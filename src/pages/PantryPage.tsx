@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { Plus, Check, ShoppingCart, Trash2, DollarSign } from 'lucide-react';
 import type { PantryItem } from '@/types/database';
-import { clsx } from 'clsx';
+// import { clsx } from 'clsx';
 
 export function PantryPage() {
   const { activeHouseholdId } = useHouseholdStore();
@@ -39,10 +39,10 @@ export function PantryPage() {
     const isBought = itemPrice !== null;
 
     const { data: newItem } = await supabase.from('pantry_items').insert({
-      household_id: activeHouseholdId, 
-      name, 
+      household_id: activeHouseholdId,
+      name,
       quantity: parseInt(quantity) || 1,
-      is_bought: isBought, 
+      is_bought: isBought,
       price: itemPrice,
       bought_at: isBought ? new Date().toISOString() : null,
       added_by: user.id,
@@ -75,7 +75,7 @@ export function PantryPage() {
   const confirmBought = async (withPrice: boolean) => {
     if (!priceModal) return;
     setLoading(true);
-    
+
     const itemPrice = withPrice && price ? parseFloat(price) : null;
 
     await supabase.from('pantry_items').update({

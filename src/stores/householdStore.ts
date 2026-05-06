@@ -126,7 +126,7 @@ export const useHouseholdStore = create<HouseholdState>()(
           .select('id')
           .eq('household_id', household.id)
           .eq('profile_id', userId)
-          .single();
+          .maybeSingle();
 
         if (existing) {
           return { error: 'Ya eres miembro de este hogar.' };
