@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { ListTodo, ShoppingCart, Wallet, Users, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Task, PantryItem, Expense, Budget } from '@/types/database';
+import { filterExpensesByPeriod, formatLocalDate, getPeriodLabel, getPeriodRange } from '@/lib/expensePeriods';
 
 export function DashboardPage() {
   const { activeHouseholdId, activeHousehold } = useHouseholdStore();
@@ -21,25 +22,33 @@ export function DashboardPage() {
   useEffect(() => {
     if (!activeHouseholdId) return;
     const fetchDashboard = async () => {
-      const { data: taskData } = await supabase.from('tasks').select('*').eq('household_id', activeHouseholdId).eq('status', 'pending').limit(5);
+      const [{ data: taskData }, { data: pantryData }, { data: budgetData }, { count }] = await Promise.all([
+        supabase.from('tasks').select('*').eq('household_id', activeHouseholdId).eq('status', 'pending').limit(5),
+        supabase.from('pantry_items').select('*').eq('household_id', activeHouseholdId).eq('is_bought', false),
+        supabase.from('budgets').select('*').eq('household_id', activeHouseholdId).limit(1).single(),
+        supabase.from('household_members').select('*', { count: 'exact', head: true }).eq('household_id', activeHouseholdId),
+      ]);
+      const budgetDataTyped = budgetData as Budget | null;
+      const monthlyRange = getPeriodRange('monthly');
+      const budgetRange = budgetDataTyped ? getPeriodRange(budgetDataTyped.period_type) : monthlyRange;
+      const expenseStart = budgetRange.start < monthlyRange.start ? budgetRange.start : monthlyRange.start;
+      const { data: expenseData } = await supabase.from('expenses').select('*').eq('household_id', activeHouseholdId).gte('date', formatLocalDate(expenseStart));
       setTasks((taskData as Task[]) || []);
-      const { data: pantryData } = await supabase.from('pantry_items').select('*').eq('household_id', activeHouseholdId).eq('is_bought', false);
       setPantryItems((pantryData as PantryItem[]) || []);
-      const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
-      const { data: expenseData } = await supabase.from('expenses').select('*').eq('household_id', activeHouseholdId).gte('date', startOfMonth.toISOString());
       setExpenses((expenseData as Expense[]) || []);
-      const { data: budgetData } = await supabase.from('budgets').select('*').eq('household_id', activeHouseholdId).limit(1).single();
       setBudget(budgetData as Budget | null);
-      const { count } = await supabase.from('household_members').select('*', { count: 'exact', head: true }).eq('household_id', activeHouseholdId);
       setMemberCount(count || 0);
     };
     fetchDashboard();
   }, [activeHouseholdId]);
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const monthlyExpenses = filterExpensesByPeriod(expenses, 'monthly');
+  const budgetExpenses = budget ? filterExpensesByPeriod(expenses, budget.period_type) : monthlyExpenses;
+  const totalExpenses = monthlyExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const budgetTotalExpenses = budgetExpenses.reduce((sum, e) => sum + e.amount, 0);
   const budgetAmount = budget?.amount || 0;
-  const budgetUsedPercent = budgetAmount > 0 ? Math.min((totalExpenses / budgetAmount) * 100, 100) : 0;
-  const isOverBudget = totalExpenses > budgetAmount && budgetAmount > 0;
+  const budgetUsedPercent = budgetAmount > 0 ? Math.min((budgetTotalExpenses / budgetAmount) * 100, 100) : 0;
+  const isOverBudget = budgetTotalExpenses > budgetAmount && budgetAmount > 0;
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -83,17 +92,17 @@ export function DashboardPage() {
       {budget && (
         <Card className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><TrendingUp size={18} className="text-surface-600" /><h3 className="font-semibold text-surface-900">Presupuesto ({budget.period_type === 'weekly' ? 'Semanal' : budget.period_type === 'biweekly' ? 'Quincenal' : 'Mensual'})</h3></div>
+            <div className="flex items-center gap-2"><TrendingUp size={18} className="text-surface-600" /><h3 className="font-semibold text-surface-900">Presupuesto ({getPeriodLabel(budget.period_type)})</h3></div>
             <span className={`text-sm font-medium px-3 py-1 rounded-full ${isOverBudget ? 'bg-danger-100 text-danger-600' : 'bg-success-100 text-success-600'}`}>{isOverBudget ? 'Excedido' : 'En presupuesto'}</span>
           </div>
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-3xl font-bold text-surface-900">${totalExpenses.toLocaleString('es-MX')}</span>
+            <span className="text-3xl font-bold text-surface-900">${budgetTotalExpenses.toLocaleString('es-MX')}</span>
             <span className="text-surface-500 mb-1">/ ${budgetAmount.toLocaleString('es-MX')}</span>
           </div>
           <div className="w-full h-3 bg-surface-200 rounded-full overflow-hidden">
             <div className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-gradient-to-r from-danger-400 to-danger-600' : 'bg-gradient-to-r from-primary-400 to-primary-600'}`} style={{ width: `${budgetUsedPercent}%` }} />
           </div>
-          <p className="text-xs text-surface-500 mt-2">{budgetAmount > totalExpenses ? `Te quedan $${(budgetAmount - totalExpenses).toLocaleString('es-MX')} disponibles` : `Excedido por $${(totalExpenses - budgetAmount).toLocaleString('es-MX')}`}</p>
+          <p className="text-xs text-surface-500 mt-2">{budgetAmount > budgetTotalExpenses ? `Te quedan $${(budgetAmount - budgetTotalExpenses).toLocaleString('es-MX')} disponibles` : `Excedido por $${(budgetTotalExpenses - budgetAmount).toLocaleString('es-MX')}`}</p>
         </Card>
       )}
 
