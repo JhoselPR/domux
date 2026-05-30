@@ -5,7 +5,8 @@ import { useHouseholdStore } from '@/stores/householdStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import { Home, Plus, UserPlus, ArrowRight, LogOut } from 'lucide-react';
+import { Home, Plus, UserPlus, ArrowRight, LogOut, CheckCircle2, Crown, Sun, Moon } from 'lucide-react';
+import { useThemeStore } from '@/stores/themeStore';
 
 export function OnboardingPage() {
   const [step, setStep] = useState<'choose' | 'create' | 'join'>('choose');
@@ -15,8 +16,10 @@ export function OnboardingPage() {
   const [error, setError] = useState('');
 
   const { user, signOut } = useAuthStore();
-  const { createHousehold, joinHousehold } = useHouseholdStore();
+  const { createHousehold, joinHousehold, households, activeHouseholdId, setActiveHousehold } = useHouseholdStore();
+  const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
+  const hasHouseholds = households.length > 0;
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +51,21 @@ export function OnboardingPage() {
     setLoading(false);
   };
 
+  const handleEnterHousehold = (householdId: string) => {
+    setActiveHousehold(householdId);
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-surface-100 px-4">
+      <button
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-200 text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer"
+        aria-label="Cambiar tema"
+      >
+        {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
+
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -60,12 +76,66 @@ export function OnboardingPage() {
             ¡Bienvenido a Domux!
           </h1>
           <p className="text-surface-600 mt-1.5">
-            Crea o únete a un hogar para comenzar
+            {hasHouseholds ? 'Elige un hogar para continuar o suma uno nuevo' : 'Crea o únete a un hogar para comenzar'}
           </p>
         </div>
 
         {step === 'choose' && (
           <div className="flex flex-col gap-4">
+            {hasHouseholds && (
+              <Card className="border-primary-300 bg-surface-50 shadow-lg shadow-primary-500/10">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div>
+                    <h3 className="font-semibold text-surface-900">Tus hogares</h3>
+                    <p className="text-sm text-surface-600 mt-1">
+                      Ya perteneces a estos hogares. Entra a uno para continuar.
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0">
+                    <Home size={20} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+                  {households.map((membership) => {
+                    const isActive = membership.household_id === activeHouseholdId;
+                    const householdName = membership.household?.name || 'Hogar sin nombre';
+
+                    return (
+                      <button
+                        key={membership.id}
+                        type="button"
+                        onClick={() => handleEnterHousehold(membership.household_id)}
+                        className="group flex items-center gap-3 rounded-xl bg-surface-100 border border-surface-300 px-3 py-3 text-left hover:border-primary-300 hover:bg-surface-50 transition-all cursor-pointer"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-surface-100 text-surface-600 flex items-center justify-center shrink-0 group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors">
+                          <Home size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-surface-900 truncate">{householdName}</p>
+                            {isActive && <CheckCircle2 size={14} className="text-success-500 shrink-0" />}
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-surface-500">
+                            {membership.role === 'admin' && <Crown size={12} className="text-warning-500" />}
+                            <span>{membership.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
+                            {isActive && <span className="text-primary-600">• activo</span>}
+                          </div>
+                        </div>
+                        <ArrowRight size={18} className="text-surface-400 group-hover:text-primary-500 transition-colors shrink-0" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+
+            {hasHouseholds && (
+              <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider mt-2">
+                Otras opciones
+              </p>
+            )}
+
             <Card hover onClick={() => setStep('create')} className="group">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 group-hover:bg-primary-200 transition-colors">

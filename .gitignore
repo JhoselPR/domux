@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .env
 .agents
+.atl
+skills-lock.json
 
 # Editor directories and files
 .vscode/*
