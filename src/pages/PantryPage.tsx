@@ -28,7 +28,13 @@ export function PantryPage() {
     setItems((data as PantryItem[]) || []);
   }, [activeHouseholdId]);
 
-  useEffect(() => { fetchItems(); }, [fetchItems]);
+  useEffect(() => {
+    const load = async () => {
+      await fetchItems();
+    };
+
+    void load();
+  }, [fetchItems]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +117,7 @@ export function PantryPage() {
     <div className="sm:ml-16 lg:ml-56 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-surface-900">Despensa</h1>
+          <h1 className="font-display text-3xl font-bold text-surface-900">Despensa</h1>
           <p className="text-surface-600 text-sm mt-1">Lista de compras del hogar</p>
         </div>
         <Button onClick={() => setShowAddModal(true)} icon={<Plus size={16} />}>Agregar</Button>
@@ -119,13 +125,13 @@ export function PantryPage() {
 
       {/* Total Spent Card */}
       {bought.length > 0 && (
-        <Card className="mb-6 bg-gradient-to-r from-primary-50 to-accent-50 border-primary-200">
+        <Card className="mb-6 bg-gradient-to-r from-pantry-50 to-pantry-100 border-pantry-500/30 shadow-md shadow-pantry-500/10">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-surface-600">Total gastado en despensa</p>
+              <p className="text-sm text-surface-700">Total gastado en despensa</p>
               <p className="text-2xl font-bold text-surface-900">${totalSpent.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
             </div>
-            <DollarSign size={24} className="text-primary-500" />
+            <DollarSign size={24} className="text-pantry-500" />
           </div>
         </Card>
       )}
@@ -140,12 +146,12 @@ export function PantryPage() {
             {unbought.map((item) => (
               <Card key={item.id} padding="sm" className="group">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => markBought(item)} className="w-6 h-6 rounded-full border-2 border-surface-300 hover:border-primary-500 hover:bg-primary-50 transition-all cursor-pointer shrink-0" />
+                  <button onClick={() => markBought(item)} className="w-6 h-6 rounded-full border-2 border-surface-300 hover:border-pantry-500 hover:bg-pantry-50 transition-all cursor-pointer shrink-0" aria-label="Marcar producto como comprado" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-surface-900">{item.name}</p>
                     {item.quantity > 1 && <p className="text-xs text-surface-500">Cantidad: {item.quantity}</p>}
                   </div>
-                  <button onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer"><Trash2 size={16} /></button>
+                  <button onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar producto"><Trash2 size={16} /></button>
                 </div>
               </Card>
             ))}
@@ -161,12 +167,12 @@ export function PantryPage() {
             {bought.map((item) => (
               <Card key={item.id} padding="sm" className="opacity-60">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => markBought(item)} className="text-success-500 cursor-pointer shrink-0"><Check size={20} /></button>
+                  <button onClick={() => markBought(item)} className="text-success-500 cursor-pointer shrink-0" aria-label="Marcar producto como pendiente"><Check size={20} /></button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-surface-700 line-through">{item.name}</p>
                   </div>
                   {item.price != null && <span className="text-sm font-medium text-surface-600">${item.price.toFixed(2)}</span>}
-                  <button onClick={() => deleteItem(item.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer"><Trash2 size={16} /></button>
+                  <button onClick={() => deleteItem(item.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar producto"><Trash2 size={16} /></button>
                 </div>
               </Card>
             ))}
@@ -186,7 +192,7 @@ export function PantryPage() {
               <Input label="Precio (opcional)" type="number" step="0.01" min="0" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} icon={<DollarSign size={16} />} />
             </div>
           </div>
-          {price && <p className="text-xs text-primary-600">Al añadir precio, se marcará como comprado y se añadirá a gastos.</p>}
+          {price && <p className="text-xs text-pantry-600">Al añadir precio, se marcará como comprado y se añadirá a gastos.</p>}
           <Button type="submit" loading={loading} fullWidth>Agregar a la lista</Button>
         </form>
       </Modal>

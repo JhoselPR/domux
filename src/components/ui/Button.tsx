@@ -14,15 +14,15 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 shadow-md hover:shadow-lg',
+    'bg-home-fill text-white hover:bg-home-fill-hover active:bg-home-fill-hover shadow-md hover:shadow-lg shadow-home-fill/15',
   secondary:
-    'bg-surface-200 text-surface-800 hover:bg-surface-300 active:bg-surface-400',
+    'bg-card-muted text-surface-800 hover:bg-surface-300 active:bg-surface-400 border border-border-subtle',
   ghost:
-    'bg-transparent text-surface-700 hover:bg-surface-200 active:bg-surface-300',
+    'bg-transparent text-surface-700 hover:bg-card-muted active:bg-surface-300',
   danger:
-    'bg-danger-500 text-white hover:bg-danger-600 active:bg-danger-600',
+    'bg-danger-fill text-white hover:bg-danger-fill-hover active:bg-danger-fill-hover shadow-md shadow-danger-fill/15',
   outline:
-    'bg-transparent border-2 border-surface-300 text-surface-800 hover:border-primary-400 hover:text-primary-600',
+    'bg-elevated/70 border border-border text-surface-800 hover:border-home-500 hover:text-home-600 hover:bg-home-50',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -45,7 +45,7 @@ export function Button({
   return (
     <button
       className={clsx(
-        'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 cursor-pointer',
+        'inline-flex min-h-10 items-center justify-center font-semibold rounded-xl transition-all duration-200 cursor-pointer',
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
         variantStyles[variant],
         sizeStyles[size],

@@ -27,7 +27,13 @@ export function SettingsPage() {
     setMembers((data as unknown as (HouseholdMember & { profile: Profile })[]) || []);
   }, [activeHouseholdId]);
 
-  useEffect(() => { fetchMembers(); }, [fetchMembers]);
+  useEffect(() => {
+    const load = async () => {
+      await fetchMembers();
+    };
+
+    void load();
+  }, [fetchMembers]);
 
   const copyCode = async () => {
     await navigator.clipboard.writeText(inviteCode);
@@ -66,14 +72,14 @@ export function SettingsPage() {
   return (
     <div className="sm:ml-16 lg:ml-56 animate-fade-in">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-surface-900">Ajustes</h1>
+        <h1 className="font-display text-3xl font-bold text-surface-900">Ajustes</h1>
         <p className="text-surface-600 text-sm mt-1">Configuración del hogar</p>
       </div>
 
       {/* Invite Code */}
       <Card className="mb-4">
         <h3 className="font-semibold text-surface-900 mb-3 flex items-center gap-2">
-          <Share2 size={16} className="text-primary-500" />
+          <Share2 size={16} className="text-settings-500" />
           Código de invitación
         </h3>
         <div className="flex items-center gap-3">
@@ -92,13 +98,13 @@ export function SettingsPage() {
       {/* Members */}
       <Card className="mb-4">
         <h3 className="font-semibold text-surface-900 mb-3 flex items-center gap-2">
-          <Users size={16} className="text-accent-500" />
+          <Users size={16} className="text-settings-500" />
           Miembros ({members.length})
         </h3>
         <div className="flex flex-col gap-2">
           {members.map((m) => (
             <div key={m.profile_id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-surface-100 group">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center text-white text-sm font-semibold shrink-0">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-400 to-settings-500 flex items-center justify-center text-white text-sm font-semibold shrink-0">
                 {m.profile?.full_name?.charAt(0).toUpperCase() || '?'}
               </div>
               <div className="flex-1 min-w-0">
@@ -108,13 +114,13 @@ export function SettingsPage() {
                 </p>
               </div>
               {m.role === 'admin' && (
-                <span className="inline-flex items-center gap-1 text-xs bg-primary-100 text-primary-600 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs bg-settings-100 text-settings-600 px-2 py-0.5 rounded-full">
                   <Shield size={10} /> Admin
                 </span>
               )}
               {isAdmin && m.profile_id !== user?.id && (
                 <button onClick={() => handleRemoveMember(m.profile_id)}
-                  className="opacity-0 group-hover:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" title="Remover miembro">
+                  className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" title="Remover miembro" aria-label="Remover miembro">
                   <UserMinus size={16} />
                 </button>
               )}
@@ -125,7 +131,7 @@ export function SettingsPage() {
 
       {/* Danger Zone */}
       {isAdmin && (
-        <Card className="border-danger-200">
+        <Card className="border-danger-100">
           <h3 className="font-semibold text-danger-600 mb-2">Zona de peligro</h3>
           <p className="text-sm text-surface-600 mb-4">Eliminar este hogar borrará todos los datos asociados de forma permanente.</p>
           <Button variant="danger" onClick={() => setConfirmDelete(true)} icon={<Trash2 size={16} />}>
@@ -138,7 +144,7 @@ export function SettingsPage() {
       <Card className="mt-4">
         <h3 className="font-semibold text-surface-900 mb-3">Tu perfil</h3>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center text-white text-lg font-semibold">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-400 to-settings-500 flex items-center justify-center text-white text-lg font-semibold">
             {profile?.full_name?.charAt(0).toUpperCase() || '?'}
           </div>
           <div>

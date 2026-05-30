@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 
 interface CardProps {
   children: ReactNode;
@@ -16,13 +16,21 @@ const paddingStyles = {
 };
 
 export function Card({ children, className, padding = 'md', hover, onClick }: CardProps) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+
+    event.preventDefault();
+    onClick();
+  };
+
   return (
     <div
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       className={clsx(
-        'rounded-2xl bg-surface-50 border border-surface-300 shadow-sm',
+        'rounded-2xl bg-card border border-border-subtle shadow-sm',
         'transition-all duration-200',
-        hover && 'hover:shadow-md hover:border-surface-400 cursor-pointer',
+        hover && 'hover:shadow-md hover:border-border cursor-pointer hover:-translate-y-0.5',
         paddingStyles[padding],
         className
       )}

@@ -49,23 +49,24 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
+      <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm animate-fade-in" />
 
       {/* Content */}
       <div
         className={clsx(
-          'relative w-full bg-surface-50 rounded-2xl shadow-xl animate-scale-in',
-          'border border-surface-300',
+          'relative w-full bg-card rounded-2xl shadow-xl animate-scale-in',
+          'border border-border-subtle',
           sizeStyles[size]
         )}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
             <h3 className="text-lg font-semibold text-surface-900">{title}</h3>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-surface-500 hover:bg-surface-200 hover:text-surface-700 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg text-surface-500 hover:bg-card-muted hover:text-surface-700 transition-colors cursor-pointer"
+              aria-label="Cerrar modal"
             >
               <X size={18} />
             </button>

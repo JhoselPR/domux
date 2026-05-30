@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DateInput } from '@/components/ui/DateInput';
 import { Modal } from '@/components/ui/Modal';
 import { Plus, Trash2, Wallet, Zap, Phone, Wifi, Droplets, Flame, Home, MoreHorizontal, TrendingUp } from 'lucide-react';
 import type { Expense, ExpenseCategory, Budget, PeriodType } from '@/types/database';
@@ -13,9 +14,9 @@ import { BUDGET_PERIODS, EXPENSE_VIEW_PERIODS, filterExpensesByPeriod, parseExpe
 
 const CATEGORIES: { key: ExpenseCategory; label: string; icon: typeof Zap; color: string }[] = [
   { key: 'electricity', label: 'Luz', icon: Zap, color: 'text-warning-500' },
-  { key: 'phone', label: 'Teléfono', icon: Phone, color: 'text-primary-500' },
-  { key: 'internet', label: 'Internet', icon: Wifi, color: 'text-accent-500' },
-  { key: 'water', label: 'Agua', icon: Droplets, color: 'text-primary-400' },
+  { key: 'phone', label: 'Teléfono', icon: Phone, color: 'text-expenses-500' },
+  { key: 'internet', label: 'Internet', icon: Wifi, color: 'text-home-500' },
+  { key: 'water', label: 'Agua', icon: Droplets, color: 'text-expenses-500' },
   { key: 'gas', label: 'Gas', icon: Flame, color: 'text-danger-500' },
   { key: 'rent', label: 'Renta', icon: Home, color: 'text-success-500' },
   { key: 'other', label: 'Otro', icon: MoreHorizontal, color: 'text-surface-500' },
@@ -87,7 +88,13 @@ export function ExpensesPage() {
     }
   }, [activeHouseholdId]);
 
-  useEffect(() => { fetchExpenses(); fetchBudget(); }, [fetchExpenses, fetchBudget]);
+  useEffect(() => {
+    const load = async () => {
+      await Promise.all([fetchExpenses(), fetchBudget()]);
+    };
+
+    void load();
+  }, [fetchExpenses, fetchBudget]);
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,14 +146,14 @@ export function ExpensesPage() {
 
   return (
     <div className="sm:ml-16 lg:ml-56 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-surface-900">Gastos</h1>
+      <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="font-display text-3xl font-bold text-surface-900">Gastos</h1>
           <p className="text-surface-600 text-sm mt-1">Control de gastos y presupuesto</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => { setBudgetAmount(budget?.amount?.toString() || ''); setBudgetPeriod(budget?.period_type || 'monthly'); setShowBudgetModal(true); }} icon={<TrendingUp size={16} />}>Presupuesto</Button>
-          <Button onClick={() => setShowExpenseModal(true)} icon={<Plus size={16} />}>Gasto</Button>
+        <div className="flex w-full gap-2 sm:w-auto sm:justify-end">
+          <Button className="flex-1 sm:flex-none" variant="outline" onClick={() => { setBudgetAmount(budget?.amount?.toString() || ''); setBudgetPeriod(budget?.period_type || 'monthly'); setShowBudgetModal(true); }} icon={<TrendingUp size={16} />}>Presupuesto</Button>
+          <Button className="flex-1 sm:flex-none" onClick={() => setShowExpenseModal(true)} icon={<Plus size={16} />}>Gasto</Button>
         </div>
       </div>
 
@@ -155,7 +162,7 @@ export function ExpensesPage() {
         {EXPENSE_VIEW_PERIODS.map(({ key, label }) => (
           <button key={key} onClick={() => handleViewPeriodChange(key)}
             className={clsx('px-4 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer',
-              viewPeriod === key ? 'bg-surface-50 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800')}>
+              viewPeriod === key ? 'bg-expenses-100 text-expenses-600 shadow-sm' : 'text-surface-600 hover:text-surface-800')}>
             {label}
           </button>
         ))}
@@ -174,7 +181,7 @@ export function ExpensesPage() {
         {showBudgetComparison && (
           <>
             <div className="w-full h-3 bg-surface-200 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-500 ${isOver ? 'bg-gradient-to-r from-danger-400 to-danger-600' : 'bg-gradient-to-r from-primary-400 to-primary-600'}`} style={{ width: `${pct}%` }} />
+              <div className={`h-full rounded-full transition-all duration-500 ${isOver ? 'bg-gradient-to-r from-danger-400 to-danger-600' : 'bg-gradient-to-r from-expenses-500 to-tasks-500'}`} style={{ width: `${pct}%` }} />
             </div>
             <p className="text-xs text-surface-500 mt-2">{bAmount > totalFiltered ? `Disponible: $${(bAmount - totalFiltered).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : `Excedido por: $${(totalFiltered - bAmount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}</p>
           </>
@@ -201,7 +208,7 @@ export function ExpensesPage() {
                     <p className="text-xs text-surface-500">{parseExpenseDate(exp.date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                   </div>
                   <span className="text-sm font-semibold text-surface-900">${exp.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
-                  <button onClick={() => deleteExpense(exp.id)} className="opacity-0 group-hover:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer"><Trash2 size={16} /></button>
+                  <button onClick={() => deleteExpense(exp.id)} className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar gasto"><Trash2 size={16} /></button>
                 </div>
               </Card>
             );
@@ -220,7 +227,7 @@ export function ExpensesPage() {
                 return (
                   <button key={cat.key} type="button" onClick={() => setCategory(cat.key)}
                     className={clsx('flex flex-col items-center gap-1 p-2 rounded-xl text-xs transition-all cursor-pointer',
-                      category === cat.key ? 'bg-primary-100 text-primary-700 border-2 border-primary-300' : 'bg-surface-100 text-surface-600 hover:bg-surface-200 border-2 border-transparent')}>
+                      category === cat.key ? 'bg-expenses-100 text-expenses-600 border-2 border-expenses-500/40' : 'bg-surface-100 text-surface-600 hover:bg-surface-200 border-2 border-transparent')}>
                     <Icon size={18} />{cat.label}
                   </button>
                 );
@@ -228,7 +235,7 @@ export function ExpensesPage() {
             </div>
           </div>
           <Input label="Monto" type="number" step="0.01" min="0" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} icon={<Wallet size={16} />} required />
-          <Input label="Fecha" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          <DateInput label="Fecha" value={date} onChange={setDate} required />
           <Input label="Descripción (opcional)" placeholder="Ej: Recibo de mayo" value={description} onChange={(e) => setDescription(e.target.value)} />
           <Button type="submit" loading={loading} fullWidth>Registrar gasto</Button>
         </form>
@@ -243,7 +250,7 @@ export function ExpensesPage() {
               {BUDGET_PERIODS.map(({ key, label }) => (
                 <button key={key} type="button" onClick={() => setBudgetPeriod(key)}
                   className={clsx('flex-1 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer',
-                    budgetPeriod === key ? 'bg-primary-600 text-white' : 'bg-surface-200 text-surface-600 hover:bg-surface-300')}>
+                    budgetPeriod === key ? 'bg-expenses-fill text-white' : 'bg-surface-200 text-surface-600 hover:bg-surface-300')}>
                   {label}
                 </button>
               ))}

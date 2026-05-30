@@ -5,7 +5,9 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { DateInput } from '@/components/ui/DateInput';
 import { Modal } from '@/components/ui/Modal';
+import { Select } from '@/components/ui/Select';
 import { Plus, CheckCircle2, Circle, Calendar, User, Repeat, Trash2 } from 'lucide-react';
 import type { Task, Profile, WeekDay } from '@/types/database';
 import { clsx } from 'clsx';
@@ -58,7 +60,13 @@ export function TasksPage() {
     setMembers(profiles);
   }, [activeHouseholdId]);
 
-  useEffect(() => { fetchTasks(); fetchMembers(); }, [fetchTasks, fetchMembers]);
+  useEffect(() => {
+    const load = async () => {
+      await Promise.all([fetchTasks(), fetchMembers()]);
+    };
+
+    void load();
+  }, [fetchTasks, fetchMembers]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +129,7 @@ export function TasksPage() {
     <div className="sm:ml-16 lg:ml-56 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-surface-900">Tareas</h1>
+          <h1 className="font-display text-3xl font-bold text-surface-900">Tareas</h1>
           <p className="text-surface-600 text-sm mt-1">Organiza las tareas del hogar</p>
         </div>
         <Button onClick={() => setShowModal(true)} icon={<Plus size={16} />}>Nueva tarea</Button>
@@ -132,7 +140,7 @@ export function TasksPage() {
         {(['all', 'daily', 'weekly'] as ViewMode[]).map((mode) => (
           <button key={mode} onClick={() => setViewMode(mode)}
             className={clsx('px-4 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer',
-              viewMode === mode ? 'bg-surface-50 text-surface-900 shadow-sm' : 'text-surface-600 hover:text-surface-800')}>
+              viewMode === mode ? 'bg-tasks-100 text-tasks-600 shadow-sm' : 'text-surface-600 hover:text-surface-800')}>
             {mode === 'all' ? 'Todas' : mode === 'daily' ? 'Hoy' : 'Semana'}
           </button>
         ))}
@@ -148,7 +156,7 @@ export function TasksPage() {
             {pendingTasks.map((task) => (
               <Card key={task.id} padding="sm" className="group">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => toggleStatus(task)} className="text-surface-400 hover:text-primary-500 transition-colors cursor-pointer shrink-0">
+                  <button onClick={() => toggleStatus(task)} className="text-surface-400 hover:text-tasks-500 transition-colors cursor-pointer shrink-0" aria-label="Marcar tarea como completada">
                     <Circle size={20} />
                   </button>
                   <div className="flex-1 min-w-0">
@@ -156,10 +164,10 @@ export function TasksPage() {
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       {task.assignee && <span className="inline-flex items-center gap-1 text-xs text-surface-500"><User size={12} />{task.assignee.full_name}</span>}
                       {task.due_date && <span className="inline-flex items-center gap-1 text-xs text-surface-500"><Calendar size={12} />{new Date(task.due_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span>}
-                      {task.is_recurring && <span className="inline-flex items-center gap-1 text-xs text-primary-500"><Repeat size={12} />{task.recurring_days.map((d) => WEEKDAYS.find((w) => w.key === d)?.short).join(', ')}</span>}
+                      {task.is_recurring && <span className="inline-flex items-center gap-1 text-xs text-tasks-500"><Repeat size={12} />{task.recurring_days.map((d) => WEEKDAYS.find((w) => w.key === d)?.short).join(', ')}</span>}
                     </div>
                   </div>
-                  <button onClick={() => deleteTask(task.id)} className="opacity-0 group-hover:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer"><Trash2 size={16} /></button>
+                    <button onClick={() => deleteTask(task.id)} className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
                 </div>
               </Card>
             ))}
@@ -175,9 +183,9 @@ export function TasksPage() {
             {completedTasks.map((task) => (
               <Card key={task.id} padding="sm" className="opacity-60">
                 <div className="flex items-center gap-3">
-                  <button onClick={() => toggleStatus(task)} className="text-success-500 cursor-pointer shrink-0"><CheckCircle2 size={20} /></button>
+                   <button onClick={() => toggleStatus(task)} className="text-success-500 cursor-pointer shrink-0" aria-label="Marcar tarea como pendiente"><CheckCircle2 size={20} /></button>
                   <p className="text-sm text-surface-700 line-through truncate flex-1">{task.title}</p>
-                  <button onClick={() => deleteTask(task.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer"><Trash2 size={16} /></button>
+                   <button onClick={() => deleteTask(task.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
                 </div>
               </Card>
             ))}
@@ -189,20 +197,18 @@ export function TasksPage() {
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Nueva tarea">
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
           <Input label="Título" placeholder="Ej: Lavar los platos" value={title} onChange={(e) => setTitle(e.target.value)} required />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-surface-700">Asignar a</label>
-            <select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)}
-              className="w-full rounded-xl border border-surface-300 bg-surface-50 px-4 py-2.5 text-sm text-surface-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500">
-              <option value="">Sin asignar</option>
-              {members.map((m) => <option key={m.id} value={m.id}>{m.full_name}</option>)}
-            </select>
-          </div>
-          <Input label="Fecha límite" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <Select
+            label="Asignar a"
+            value={assignedTo}
+            onChange={setAssignedTo}
+            options={[{ value: '', label: 'Sin asignar' }, ...members.map((member) => ({ value: member.id, label: member.full_name }))]}
+          />
+          <DateInput label="Fecha límite" value={dueDate} onChange={setDueDate} />
 
           {/* Recurrence */}
           <div>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="w-4 h-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500" />
+              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="w-4 h-4 rounded border-surface-300 text-tasks-600 focus:ring-tasks-500" />
               <span className="text-sm font-medium text-surface-700">Repetir semanalmente</span>
             </label>
             {isRecurring && (
@@ -210,7 +216,7 @@ export function TasksPage() {
                 {WEEKDAYS.map(({ key, short }) => (
                   <button key={key} type="button" onClick={() => toggleDay(key)}
                     className={clsx('w-9 h-9 rounded-full text-xs font-semibold transition-all cursor-pointer',
-                      recurringDays.includes(key) ? 'bg-primary-600 text-white shadow-md' : 'bg-surface-200 text-surface-600 hover:bg-surface-300')}>
+                      recurringDays.includes(key) ? 'bg-tasks-fill text-white shadow-md' : 'bg-surface-200 text-surface-600 hover:bg-surface-300')}>
                     {short}
                   </button>
                 ))}

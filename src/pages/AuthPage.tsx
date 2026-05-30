@@ -49,11 +49,11 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-100 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-4">
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-200 text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer"
+        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle"
         aria-label="Toggle theme"
       >
         {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -62,10 +62,10 @@ export function AuthPage() {
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/25 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 shadow-lg shadow-home-500/25 mb-4">
             <Home className="text-white" size={28} />
           </div>
-          <h1 className="text-3xl font-bold text-surface-900 tracking-tight">
+          <h1 className="font-display text-4xl font-bold text-surface-900 tracking-tight">
             Domux
           </h1>
           <p className="text-surface-600 mt-1.5">
@@ -74,7 +74,7 @@ export function AuthPage() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-surface-50 rounded-2xl border border-surface-300 shadow-lg p-8">
+        <div className="bg-card rounded-3xl border border-border-subtle shadow-lg p-8">
           <h2 className="text-xl font-semibold text-surface-900 mb-6">
             {mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}
           </h2>
@@ -113,7 +113,7 @@ export function AuthPage() {
             />
 
             {error && (
-              <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100 animate-slide-down">
+              <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100 animate-slide-down" role="alert">
                 {error}
               </div>
             )}

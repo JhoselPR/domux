@@ -57,10 +57,10 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-100 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-4">
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2.5 rounded-xl bg-surface-200 text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer"
+        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle"
         aria-label="Cambiar tema"
       >
         {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -69,10 +69,10 @@ export function OnboardingPage() {
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-lg shadow-primary-500/25 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 shadow-lg shadow-home-500/25 mb-4">
             <Home className="text-white" size={28} />
           </div>
-          <h1 className="text-2xl font-bold text-surface-900 tracking-tight">
+          <h1 className="font-display text-3xl font-bold text-surface-900 tracking-tight">
             ¡Bienvenido a Domux!
           </h1>
           <p className="text-surface-600 mt-1.5">
@@ -83,7 +83,7 @@ export function OnboardingPage() {
         {step === 'choose' && (
           <div className="flex flex-col gap-4">
             {hasHouseholds && (
-              <Card className="border-primary-300 bg-surface-50 shadow-lg shadow-primary-500/10">
+              <Card className="border-home-500/30 bg-card shadow-lg shadow-home-500/10">
                 <div className="flex items-start justify-between gap-3 mb-4">
                   <div>
                     <h3 className="font-semibold text-surface-900">Tus hogares</h3>
@@ -91,7 +91,7 @@ export function OnboardingPage() {
                       Ya perteneces a estos hogares. Entra a uno para continuar.
                     </p>
                   </div>
-                  <div className="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-home-100 text-home-600 flex items-center justify-center shrink-0">
                     <Home size={20} />
                   </div>
                 </div>
@@ -106,9 +106,9 @@ export function OnboardingPage() {
                         key={membership.id}
                         type="button"
                         onClick={() => handleEnterHousehold(membership.household_id)}
-                        className="group flex items-center gap-3 rounded-xl bg-surface-100 border border-surface-300 px-3 py-3 text-left hover:border-primary-300 hover:bg-surface-50 transition-all cursor-pointer"
+                        className="group flex items-center gap-3 rounded-xl bg-surface-100 border border-border-subtle px-3 py-3 text-left hover:border-home-500/40 hover:bg-card transition-all cursor-pointer"
                       >
-                        <div className="w-10 h-10 rounded-xl bg-surface-100 text-surface-600 flex items-center justify-center shrink-0 group-hover:bg-primary-100 group-hover:text-primary-600 transition-colors">
+                          <div className="w-10 h-10 rounded-xl bg-surface-100 text-surface-600 flex items-center justify-center shrink-0 group-hover:bg-home-100 group-hover:text-home-600 transition-colors">
                           <Home size={18} />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -119,10 +119,10 @@ export function OnboardingPage() {
                           <div className="flex items-center gap-1.5 mt-0.5 text-xs text-surface-500">
                             {membership.role === 'admin' && <Crown size={12} className="text-warning-500" />}
                             <span>{membership.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
-                            {isActive && <span className="text-primary-600">• activo</span>}
+                            {isActive && <span className="text-home-600">• activo</span>}
                           </div>
                         </div>
-                        <ArrowRight size={18} className="text-surface-400 group-hover:text-primary-500 transition-colors shrink-0" />
+                        <ArrowRight size={18} className="text-surface-400 group-hover:text-home-500 transition-colors shrink-0" />
                       </button>
                     );
                   })}
@@ -138,7 +138,7 @@ export function OnboardingPage() {
 
             <Card hover onClick={() => setStep('create')} className="group">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 group-hover:bg-primary-200 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-home-100 text-home-600 flex items-center justify-center shrink-0 group-hover:bg-home-50 transition-colors">
                   <Plus size={24} />
                 </div>
                 <div className="flex-1 text-left">
@@ -147,13 +147,13 @@ export function OnboardingPage() {
                     Empieza un nuevo hogar e invita a los demás
                   </p>
                 </div>
-                <ArrowRight size={18} className="text-surface-400 group-hover:text-primary-500 transition-colors" />
+                <ArrowRight size={18} className="text-surface-400 group-hover:text-home-500 transition-colors" />
               </div>
             </Card>
 
             <Card hover onClick={() => setStep('join')} className="group">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-accent-100 text-accent-600 flex items-center justify-center shrink-0 group-hover:bg-accent-200 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-settings-100 text-settings-600 flex items-center justify-center shrink-0 group-hover:bg-settings-50 transition-colors">
                   <UserPlus size={24} />
                 </div>
                 <div className="flex-1 text-left">
@@ -162,7 +162,7 @@ export function OnboardingPage() {
                     Usa un código de invitación para unirte
                   </p>
                 </div>
-                <ArrowRight size={18} className="text-surface-400 group-hover:text-accent-500 transition-colors" />
+                <ArrowRight size={18} className="text-surface-400 group-hover:text-settings-500 transition-colors" />
               </div>
             </Card>
 
@@ -190,7 +190,7 @@ export function OnboardingPage() {
               />
 
               {error && (
-                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100">
+                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100" role="alert">
                   {error}
                 </div>
               )}
@@ -230,7 +230,7 @@ export function OnboardingPage() {
               </p>
 
               {error && (
-                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100">
+                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100" role="alert">
                   {error}
                 </div>
               )}

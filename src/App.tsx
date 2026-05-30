@@ -14,8 +14,8 @@ import { Home } from 'lucide-react';
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-surface-100 gap-4">
-      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/25 animate-pulse-soft">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent gap-4">
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 flex items-center justify-center shadow-lg shadow-home-500/25 animate-pulse-soft">
         <Home className="text-white" size={28} />
       </div>
       <p className="text-surface-500 text-sm animate-pulse">Cargando...</p>
@@ -55,8 +55,6 @@ export default function App() {
   useEffect(() => {
     if (initialized && userId) {
       fetchHouseholds(userId).then(() => setReady(true));
-    } else if (initialized) {
-      setReady(true);
     }
   }, [initialized, userId, fetchHouseholds]);
 
