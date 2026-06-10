@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/Input';
 import { DateInput } from '@/components/ui/DateInput';
 import { Modal } from '@/components/ui/Modal';
 import { Select } from '@/components/ui/Select';
-import { Plus, CheckCircle2, Circle, Calendar, User, Repeat, Trash2 } from 'lucide-react';
+import { enableTaskPushNotifications, getPushNotificationState, type PushNotificationState } from '@/lib/pushNotifications';
+import { Plus, CheckCircle2, Circle, Calendar, User, Repeat, Trash2, Bell } from 'lucide-react';
 import type { Task, Profile, WeekDay } from '@/types/database';
 import { clsx } from 'clsx';
 
@@ -23,6 +24,15 @@ const WEEKDAYS: { key: WeekDay; label: string; short: string }[] = [
 ];
 
 type ViewMode = 'all' | 'daily' | 'weekly';
+type ReminderTiming = 'none' | 'due_day' | 'one_day_before' | 'two_days_before' | 'custom';
+
+const REMINDER_OPTIONS: { value: ReminderTiming; label: string }[] = [
+  { value: 'none', label: 'Sin recordatorio' },
+  { value: 'due_day', label: 'El día de vencimiento' },
+  { value: 'one_day_before', label: '1 día antes' },
+  { value: 'two_days_before', label: '2 días antes' },
+  { value: 'custom', label: 'Fecha y hora personalizada' },
+];
 
 export function TasksPage() {
   const { activeHouseholdId } = useHouseholdStore();
@@ -32,11 +42,17 @@ export function TasksPage() {
   const [showModal, setShowModal] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('all');
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [pushState, setPushState] = useState<PushNotificationState>(() => getPushNotificationState());
+  const [pushLoading, setPushLoading] = useState(false);
+  const [pushMessage, setPushMessage] = useState('');
 
   // Form state
   const [title, setTitle] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [reminderTiming, setReminderTiming] = useState<ReminderTiming>('due_day');
+  const [customReminderAt, setCustomReminderAt] = useState('');
   const [isRecurring, setIsRecurring] = useState(false);
   const [recurringDays, setRecurringDays] = useState<WeekDay[]>([]);
 
@@ -71,20 +87,63 @@ export function TasksPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeHouseholdId || !user) return;
+    setFormError('');
     setLoading(true);
-    await supabase.from('tasks').insert({
-      household_id: activeHouseholdId,
-      title,
-      status: 'pending',
-      assigned_to: assignedTo || null,
-      due_date: dueDate || null,
-      is_recurring: isRecurring,
-      recurring_days: recurringDays,
-      created_by: user.id,
-    });
-    setTitle(''); setAssignedTo(''); setDueDate(''); setIsRecurring(false); setRecurringDays([]);
-    setShowModal(false); setLoading(false);
-    fetchTasks();
+
+    try {
+      const { data: task, error: taskError } = await supabase.from('tasks').insert({
+        household_id: activeHouseholdId,
+        title,
+        status: 'pending',
+        assigned_to: assignedTo || null,
+        due_date: dueDate || null,
+        is_recurring: isRecurring,
+        recurring_days: recurringDays,
+        created_by: user.id,
+      }).select('id').single();
+
+      if (taskError) throw taskError;
+
+      if (task && reminderTiming !== 'none') {
+        const { error: reminderError } = await supabase.rpc('create_task_reminders', {
+          p_task_id: task.id,
+          p_timing: reminderTiming,
+          p_custom_scheduled_for: reminderTiming === 'custom' && customReminderAt
+            ? new Date(customReminderAt).toISOString()
+            : null,
+        });
+
+        if (reminderError) throw reminderError;
+      }
+
+      setTitle(''); setAssignedTo(''); setDueDate(''); setReminderTiming('due_day'); setCustomReminderAt(''); setIsRecurring(false); setRecurringDays([]);
+      setShowModal(false);
+      fetchTasks();
+    } catch {
+      setFormError('No pudimos crear la tarea con el recordatorio. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const enableNotifications = async () => {
+    if (!user) return;
+    setPushLoading(true);
+    setPushMessage('');
+
+    try {
+      const nextState = await enableTaskPushNotifications(user.id);
+      setPushState(nextState);
+      setPushMessage(nextState === 'granted'
+        ? 'Notificaciones activadas para este dispositivo.'
+        : nextState === 'denied'
+          ? 'El navegador bloqueó las notificaciones.'
+          : 'Las notificaciones no están disponibles en este dispositivo.');
+    } catch {
+      setPushMessage('No pudimos activar las notificaciones. Intenta de nuevo.');
+    } finally {
+      setPushLoading(false);
+    }
   };
 
   const toggleStatus = async (task: Task) => {
@@ -146,6 +205,22 @@ export function TasksPage() {
         ))}
       </div>
 
+      <Card padding="sm" className="mb-6 bg-tasks-50/60">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 rounded-full bg-tasks-100 p-2 text-tasks-600"><Bell size={16} /></span>
+            <div>
+              <p className="text-sm font-semibold text-surface-900">Recordatorios de tareas</p>
+              <p className="text-sm text-surface-600">Activa notificaciones persistentes para recibir avisos en este dispositivo.</p>
+              {pushMessage && <p className="mt-1 text-xs font-medium text-surface-600">{pushMessage}</p>}
+            </div>
+          </div>
+          <Button type="button" variant={pushState === 'granted' ? 'secondary' : 'primary'} onClick={enableNotifications} loading={pushLoading} disabled={pushState === 'unsupported' || pushState === 'missing-key'}>
+            {pushState === 'granted' ? 'Activadas' : 'Activar avisos'}
+          </Button>
+        </div>
+      </Card>
+
       {/* Pending */}
       <div className="mb-6">
         <h2 className="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-3">Pendientes ({pendingTasks.length})</h2>
@@ -204,6 +279,29 @@ export function TasksPage() {
             options={[{ value: '', label: 'Sin asignar' }, ...members.map((member) => ({ value: member.id, label: member.full_name }))]}
           />
           <DateInput label="Fecha límite" value={dueDate} onChange={setDueDate} />
+          <Select
+            label="Recordatorio"
+            value={reminderTiming}
+            onChange={(value) => setReminderTiming(value as ReminderTiming)}
+            options={REMINDER_OPTIONS.map((option) => ({
+              ...option,
+              disabled: option.value !== 'none' && option.value !== 'custom' && !dueDate,
+            }))}
+          />
+          {reminderTiming === 'custom' && (
+            <Input
+              label="Fecha y hora del recordatorio"
+              type="datetime-local"
+              value={customReminderAt}
+              onChange={(event) => setCustomReminderAt(event.target.value)}
+              required
+            />
+          )}
+          {formError && (
+            <div className="rounded-xl border border-danger-100 bg-danger-50 px-4 py-3 text-sm text-danger-600" role="alert">
+              {formError}
+            </div>
+          )}
 
           {/* Recurrence */}
           <div>

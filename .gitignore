@@ -26,4 +26,3 @@ skills-lock.json
 *.njsproj
 *.sln
 *.sw?
-/supabase

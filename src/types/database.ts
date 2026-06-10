@@ -2,6 +2,7 @@
 
 export type UserRole = 'admin' | 'member';
 export type TaskStatus = 'pending' | 'completed';
+export type TaskReminderStatus = 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled';
 export type PeriodType = 'weekly' | 'biweekly' | 'monthly';
 export type ExpenseCategory = 'electricity' | 'phone' | 'internet' | 'water' | 'gas' | 'rent' | 'other';
 export type WeekDay = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
@@ -46,6 +47,36 @@ export interface Task {
   created_at: string;
   // Joined data
   assignee?: Profile;
+}
+
+export interface PushSubscription {
+  id: string;
+  profile_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_agent: string | null;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_seen_at: string;
+}
+
+export interface TaskReminder {
+  id: string;
+  task_id: string;
+  household_id: string;
+  recipient_id: string;
+  scheduled_for: string;
+  status: TaskReminderStatus;
+  sent_at: string | null;
+  locked_at: string | null;
+  lock_token: string | null;
+  attempts: number;
+  last_error: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PantryItem {
