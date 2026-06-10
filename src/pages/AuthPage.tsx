@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -7,20 +7,29 @@ import { Home, Mail, Lock, User, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 
 export function AuthPage() {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = searchParams.get('mode') === 'register' ? 'register' : 'login';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { signIn, signUp, signInWithGoogle } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
 
+  const switchMode = () => {
+    setError('');
+    setSuccessMessage('');
+    setSearchParams({ mode: mode === 'login' ? 'register' : 'login' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setLoading(true);
 
     try {
@@ -39,6 +48,11 @@ export function AuthPage() {
         const result = await signUp(email, password, fullName);
         if (result.error) {
           setError(result.error);
+        } else if (result.needsEmailConfirmation) {
+          setPassword('');
+          setFullName('');
+          setSearchParams({ mode: 'login' });
+          setSuccessMessage('Cuenta creada. Verifica tu correo electrónico y luego inicia sesión.');
         } else {
           navigate('/');
         }
@@ -53,8 +67,8 @@ export function AuthPage() {
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle"
-        aria-label="Toggle theme"
+        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-home-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-50"
+        aria-label="Cambiar tema"
       >
         {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
       </button>
@@ -118,6 +132,12 @@ export function AuthPage() {
               </div>
             )}
 
+            {successMessage && (
+              <div className="bg-home-50 text-home-700 text-sm rounded-xl px-4 py-3 border border-home-100 animate-slide-down" role="status">
+                {successMessage}
+              </div>
+            )}
+
             <Button
               type="submit"
               loading={loading}
@@ -167,10 +187,7 @@ export function AuthPage() {
           <div className="mt-6 text-center">
             <button
               type="button"
-              onClick={() => {
-                setMode(mode === 'login' ? 'register' : 'login');
-                setError('');
-              }}
+              onClick={switchMode}
               className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors cursor-pointer"
             >
               {mode === 'login'

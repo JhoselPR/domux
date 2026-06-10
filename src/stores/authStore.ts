@@ -11,7 +11,7 @@ interface AuthState {
   initialized: boolean;
 
   initialize: () => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signUp: async (email: string, password: string, fullName: string) => {
     // Profile is auto-created by a database trigger (handle_new_user)
     // which reads full_name from raw_user_meta_data
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -59,8 +59,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       },
     });
 
-    if (error) return { error: error.message };
-    return { error: null };
+    if (error) return { error: error.message, needsEmailConfirmation: false };
+    return { error: null, needsEmailConfirmation: !data.session };
   },
 
   signIn: async (email: string, password: string) => {

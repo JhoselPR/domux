@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { AuthPage } from '@/pages/AuthPage';
+import { LandingPage } from '@/pages/LandingPage';
 import { OnboardingPage } from '@/pages/OnboardingPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { TasksPage } from '@/pages/TasksPage';
@@ -38,14 +39,26 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function HomeRoute() {
+  const { user } = useAuthStore();
+
+  if (!user) return <LandingPage />;
+
+  return (
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  );
+}
+
 function JoinRedirect() {
   return <Navigate to="/onboarding" replace />;
 }
 
 export default function App() {
   const { initialize, user, loading, initialized } = useAuthStore();
-  const { fetchHouseholds } = useHouseholdStore();
-  const [ready, setReady] = useState(false);
+  const { fetchHouseholds, reset: resetHouseholds } = useHouseholdStore();
+  const [readyUserId, setReadyUserId] = useState<string | null>(null);
   const userId = user?.id;
 
   useEffect(() => {
@@ -53,12 +66,19 @@ export default function App() {
   }, [initialize]);
 
   useEffect(() => {
-    if (initialized && userId) {
-      fetchHouseholds(userId).then(() => setReady(true));
-    }
-  }, [initialized, userId, fetchHouseholds]);
+    if (!initialized) return;
 
-  if (loading || (!ready && userId)) return <LoadingScreen />;
+    if (!userId) {
+      resetHouseholds();
+      return;
+    }
+
+    if (initialized && userId) {
+      fetchHouseholds(userId).then(() => setReadyUserId(userId));
+    }
+  }, [initialized, userId, fetchHouseholds, resetHouseholds]);
+
+  if (loading || (userId && readyUserId !== userId)) return <LoadingScreen />;
 
   return (
     <BrowserRouter>
@@ -67,8 +87,11 @@ export default function App() {
         <Route path="/onboarding" element={user ? <OnboardingPage /> : <Navigate to="/auth" replace />} />
         <Route path="/join/:code" element={<JoinRedirect />} />
 
+        <Route path="/" element={<HomeRoute />}>
+          <Route index element={<DashboardPage />} />
+        </Route>
+
         <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-          <Route path="/" element={<DashboardPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/pantry" element={<PantryPage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
