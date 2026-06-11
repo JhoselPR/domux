@@ -76,8 +76,9 @@ export function LandingPage() {
       <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-stretch gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <div className="flex w-full items-center justify-between sm:w-auto sm:gap-3">
           <Link to="/" className={`flex w-fit items-center gap-2 rounded-xl font-display text-2xl font-bold tracking-tight text-surface-900 ${focusRing}`}>
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 shadow-lg shadow-home-500/20">
-              <Home className="text-white" size={20} aria-hidden="true" />
+            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 shadow-lg shadow-home-500/20">
+              {/* <Home className="text-white" size={20} aria-hidden="true" /> */}
+              <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
             </span>
             Domux
           </Link>

@@ -76,8 +76,9 @@ export function AuthPage() {
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 shadow-lg shadow-home-500/25 mb-4">
-            <Home className="text-white" size={28} />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 shadow-lg shadow-home-500/25 mb-4">
+            {/* <Home className="text-white" size={28} /> */}
+            <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
           </div>
           <h1 className="font-display text-4xl font-bold text-surface-900 tracking-tight">
             Domux

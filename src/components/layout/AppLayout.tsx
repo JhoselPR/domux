@@ -58,8 +58,9 @@ export function AppLayout() {
           {/* Left: Logo + Household Selector */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-home-500 to-tasks-500 flex items-center justify-center shadow-md shadow-home-500/20">
-                <Home className="text-white" size={16} />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-home-50 to-tasks-100 flex items-center justify-center shadow-md shadow-home-500/20">
+                {/* <Home className="text-white" size={16} /> */}
+                <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
               </div>
               <span className="font-display text-xl font-bold text-surface-900 tracking-tight hidden sm:block">
                 Domux

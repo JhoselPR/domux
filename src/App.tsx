@@ -16,8 +16,9 @@ import { Home } from 'lucide-react';
 function LoadingScreen() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent gap-4">
-      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-home-500 to-tasks-500 flex items-center justify-center shadow-lg shadow-home-500/25 animate-pulse-soft">
-        <Home className="text-white" size={28} />
+      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 flex items-center justify-center shadow-lg shadow-home-500/25 animate-pulse-soft">
+        {/* <Home className="text-white" size={28} /> */}
+        <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
       </div>
       <p className="text-surface-500 text-sm animate-pulse">Cargando...</p>
     </div>
