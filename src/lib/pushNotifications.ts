@@ -11,6 +11,7 @@ type StoredPushSubscription = {
 };
 
 const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+const SERVICE_WORKER_READY_TIMEOUT_MS = 10000;
 
 export function getPushNotificationState(): PushNotificationState {
   if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
@@ -30,7 +31,7 @@ export async function enableTaskPushNotifications(profileId: string) {
   const permission = state === 'granted' ? 'granted' : await Notification.requestPermission();
   if (permission !== 'granted') return permission as PushNotificationState;
 
-  const registration = await navigator.serviceWorker.ready;
+  const registration = await waitForServiceWorkerReady();
   const existingSubscription = await registration.pushManager.getSubscription();
   const subscription = existingSubscription ?? await registration.pushManager.subscribe({
     userVisibleOnly: true,
@@ -58,6 +59,17 @@ export async function enableTaskPushNotifications(profileId: string) {
 
   if (error) throw error;
   return 'granted' satisfies PushNotificationState;
+}
+
+async function waitForServiceWorkerReady() {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) => {
+      window.setTimeout(() => {
+        reject(new Error('El Service Worker no quedó listo a tiempo.'));
+      }, SERVICE_WORKER_READY_TIMEOUT_MS);
+    }),
+  ]);
 }
 
 function urlBase64ToUint8Array(base64String: string) {
