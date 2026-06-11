@@ -5,7 +5,6 @@ import {
   BellRing,
   CheckCircle2,
   ClipboardList,
-  Home,
   Moon,
   PackageCheck,
   ReceiptText,

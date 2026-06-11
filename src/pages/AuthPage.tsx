@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Home, Mail, Lock, User, Sun, Moon } from 'lucide-react';
+import { Mail, Lock, User, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 
 export function AuthPage() {

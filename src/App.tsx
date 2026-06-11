@@ -11,7 +11,7 @@ import { PantryPage } from '@/pages/PantryPage';
 import { ExpensesPage } from '@/pages/ExpensesPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Home } from 'lucide-react';
+// import { Home } from 'lucide-react';
 
 function LoadingScreen() {
   return (
