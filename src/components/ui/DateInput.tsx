@@ -144,7 +144,7 @@ export function DateInput({
   return (
     <div ref={rootRef} className={clsx('relative flex flex-col gap-1.5', className)}>
       {label && (
-        <label id={`${inputId}-label`} className="text-sm font-medium text-surface-700">
+        <label id={`${inputId}-label`} className="text-sm font-medium text-ink-2">
           {label}
         </label>
       )}
@@ -170,16 +170,16 @@ export function DateInput({
           }
         }}
         className={clsx(
-          'flex w-full items-center justify-between gap-3 rounded-xl border border-border-subtle bg-elevated px-4 py-2.5 text-left text-sm',
-          'text-surface-900 shadow-sm transition-all duration-200 hover:border-border',
-          'focus:outline-none focus:ring-2 focus:ring-home-500/30 focus:border-home-500',
+          'flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-line-strong bg-card px-3 text-left text-sm',
+          'text-ink transition-[border-color,box-shadow]',
+          'focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent',
           'disabled:cursor-not-allowed disabled:opacity-60'
         )}
       >
-        <span className={clsx('truncate', !selectedDate && 'text-surface-500')}>
+        <span className={clsx('truncate', !selectedDate && 'text-ink-3')}>
           {selectedDate ? DISPLAY_FORMATTER.format(selectedDate) : placeholder}
         </span>
-        <CalendarDays size={16} className="shrink-0 text-surface-500" />
+        <CalendarDays size={16} className="shrink-0 text-ink-3" />
       </button>
       {required && <input tabIndex={-1} className="sr-only" required value={value} onChange={() => {}} aria-hidden="true" />}
 
@@ -196,23 +196,23 @@ export function DateInput({
           }}
           style={{ maxHeight: popoverLayout.maxHeight }}
           className={clsx(
-            'absolute left-0 z-50 w-full max-w-80 overflow-y-auto overscroll-contain rounded-2xl border border-border-subtle bg-card p-2.5 shadow-xl animate-slide-down',
+            'absolute left-0 z-50 w-full max-w-80 overflow-y-auto overscroll-contain rounded-xl border border-line bg-card p-3 shadow-[0_8px_24px_rgba(0,0,0,0.1)] animate-slide-down',
             popoverLayout.placement === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
           )}
         >
           <div className="mb-2 flex items-center justify-between gap-2">
-            <button type="button" onClick={() => moveMonth(-1)} className="rounded-lg p-1.5 text-surface-600 transition-colors hover:bg-card-muted" aria-label="Mes anterior">
+            <button type="button" onClick={() => moveMonth(-1)} className="rounded-md p-1.5 text-ink-2 transition-colors hover:bg-raised" aria-label="Mes anterior">
               <ChevronLeft size={16} />
             </button>
-            <p className="text-sm font-semibold capitalize text-surface-900">
+            <p className="text-sm font-medium capitalize text-ink">
               {MONTH_FORMATTER.format(visibleMonth)}
             </p>
-            <button type="button" onClick={() => moveMonth(1)} className="rounded-lg p-1.5 text-surface-600 transition-colors hover:bg-card-muted" aria-label="Mes siguiente">
+            <button type="button" onClick={() => moveMonth(1)} className="rounded-md p-1.5 text-ink-2 transition-colors hover:bg-raised" aria-label="Mes siguiente">
               <ChevronRight size={16} />
             </button>
           </div>
 
-          <div className="grid grid-cols-7 gap-0.5 text-center text-[10px] font-semibold uppercase tracking-wide text-surface-500">
+          <div className="grid grid-cols-7 gap-0.5 text-center text-xs text-ink-3">
             {WEEKDAYS.map((day) => <span key={day} className="py-0.5">{day}</span>)}
           </div>
           <div className="mt-1 grid grid-cols-7 gap-0.5">
@@ -228,11 +228,11 @@ export function DateInput({
                   type="button"
                   onClick={() => chooseDate(date)}
                   className={clsx(
-                    'aspect-square min-h-7 rounded-lg text-xs font-medium transition-all',
-                    selected && 'bg-home-fill text-white shadow-md shadow-home-500/20',
-                    !selected && today && 'bg-home-100 text-home-600 ring-1 ring-home-500/30',
-                    !selected && !today && !muted && 'text-surface-800 hover:bg-card-muted',
-                    !selected && muted && 'text-surface-400 hover:bg-card-muted'
+                    'aspect-square min-h-7 rounded-md text-xs tabular-nums transition-colors',
+                    selected && 'bg-primary font-medium text-on-primary',
+                    !selected && today && 'bg-raised font-medium text-ink',
+                    !selected && !today && !muted && 'text-ink-2 hover:bg-raised',
+                    !selected && muted && 'text-ink-3/60 hover:bg-raised'
                   )}
                   aria-pressed={selected}
                 >

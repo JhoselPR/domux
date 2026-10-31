@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Logo } from '@/components/ui/Logo';
 import { Mail, Lock, User, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 
@@ -63,11 +64,11 @@ export function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-4">
+    <div className="warm flex min-h-screen flex-col items-center justify-center px-4 py-12">
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-home-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-50"
+        className="absolute right-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-raised hover:text-ink"
         aria-label="Cambiar tema"
       >
         {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -75,22 +76,14 @@ export function AuthPage() {
 
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 shadow-lg shadow-home-500/25 mb-4">
-            {/* <Home className="text-white" size={28} /> */}
-            <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
-          </div>
-          <h1 className="font-display text-4xl font-bold text-surface-900 tracking-tight">
-            Domux
-          </h1>
-          <p className="text-surface-600 mt-1.5">
-            Gestiona tu hogar en equipo
-          </p>
+        <div className="mb-8 flex flex-col items-center gap-2 text-center">
+          <Logo size={32} className="!text-2xl" />
+          <p className="text-sm text-ink-2">Gestiona tu hogar en equipo</p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-card rounded-3xl border border-border-subtle shadow-lg p-8">
-          <h2 className="text-xl font-semibold text-surface-900 mb-6">
+        <div className="rounded-xl border border-line bg-card p-6 sm:p-8">
+          <h2 className="mb-6 font-display text-2xl font-medium text-ink">
             {mode === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}
           </h2>
 
@@ -128,13 +121,13 @@ export function AuthPage() {
             />
 
             {error && (
-              <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100 animate-slide-down" role="alert">
+              <div className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger animate-slide-down" role="alert">
                 {error}
               </div>
             )}
 
             {successMessage && (
-              <div className="bg-home-50 text-home-700 text-sm rounded-xl px-4 py-3 border border-home-100 animate-slide-down" role="status">
+              <div className="rounded-lg bg-raised px-3 py-2 text-sm text-ink animate-slide-down" role="status">
                 {successMessage}
               </div>
             )}
@@ -149,10 +142,10 @@ export function AuthPage() {
               {mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
             </Button>
             
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-surface-200"></div>
-              <span className="flex-shrink-0 mx-4 text-surface-500 text-sm">o</span>
-              <div className="flex-grow border-t border-surface-200"></div>
+            <div className="flex items-center gap-4">
+              <div className="flex-grow border-t border-line"></div>
+              <span className="text-sm text-ink-3">o</span>
+              <div className="flex-grow border-t border-line"></div>
             </div>
 
             <Button
@@ -161,9 +154,9 @@ export function AuthPage() {
               fullWidth
               size="lg"
               onClick={() => signInWithGoogle()}
-              className="flex items-center justify-center gap-3 bg-surface-50 hover:bg-surface-100 text-surface-800"
+              
             >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                   fill="#4285F4"
@@ -189,7 +182,7 @@ export function AuthPage() {
             <button
               type="button"
               onClick={switchMode}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors cursor-pointer"
+              className="cursor-pointer rounded-sm text-sm text-ink-2 transition-colors hover:text-ink"
             >
               {mode === 'login'
                 ? '¿No tienes cuenta? Regístrate'

@@ -11,16 +11,13 @@ import { PantryPage } from '@/pages/PantryPage';
 import { ExpensesPage } from '@/pages/ExpensesPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { AppLayout } from '@/components/layout/AppLayout';
-// import { Home } from 'lucide-react';
+import { LogoMark } from '@/components/ui/Logo';
 
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent gap-4">
-      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 flex items-center justify-center shadow-lg shadow-home-500/25 animate-pulse-soft">
-        {/* <Home className="text-white" size={28} /> */}
-        <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
-      </div>
-      <p className="text-surface-500 text-sm animate-pulse">Cargando...</p>
+    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-page">
+      <LogoMark size={32} />
+      <p className="text-sm text-ink-3">Cargando</p>
     </div>
   );
 }

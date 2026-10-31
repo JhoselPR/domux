@@ -5,7 +5,8 @@ import { useHouseholdStore } from '@/stores/householdStore';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
-import { Home, Plus, UserPlus, ArrowRight, LogOut, CheckCircle2, Crown, Sun, Moon } from 'lucide-react';
+import { LogoMark } from '@/components/ui/Logo';
+import { Home, Plus, UserPlus, ArrowRight, LogOut, Sun, Moon } from 'lucide-react';
 import { useThemeStore } from '@/stores/themeStore';
 
 export function OnboardingPage() {
@@ -57,10 +58,10 @@ export function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-4">
+    <div className="warm flex min-h-screen flex-col items-center justify-center px-4 py-12">
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 p-2.5 rounded-xl bg-card-muted text-surface-700 hover:bg-surface-300 transition-colors cursor-pointer border border-border-subtle"
+        className="absolute right-4 top-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-raised hover:text-ink"
         aria-label="Cambiar tema"
       >
         {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
@@ -68,15 +69,10 @@ export function OnboardingPage() {
 
       <div className="w-full max-w-md animate-slide-up">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 shadow-lg shadow-home-500/25 mb-4">
-            {/* <Home className="text-white" size={28} /> */}
-            <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
-          </div>
-          <h1 className="font-display text-3xl font-bold text-surface-900 tracking-tight">
-            ¡Bienvenido a Domux!
-          </h1>
-          <p className="text-surface-600 mt-1.5">
+        <div className="mb-8 flex flex-col items-center gap-3 text-center">
+          <LogoMark size={32} />
+          <h1 className="font-display text-3xl font-medium text-ink">Tu hogar en Domux</h1>
+          <p className="text-sm text-ink-2">
             {hasHouseholds ? 'Elige un hogar para continuar o suma uno nuevo' : 'Crea o únete a un hogar para comenzar'}
           </p>
         </div>
@@ -84,20 +80,9 @@ export function OnboardingPage() {
         {step === 'choose' && (
           <div className="flex flex-col gap-4">
             {hasHouseholds && (
-              <Card className="border-home-500/30 bg-card shadow-lg shadow-home-500/10">
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div>
-                    <h3 className="font-semibold text-surface-900">Tus hogares</h3>
-                    <p className="text-sm text-surface-600 mt-1">
-                      Ya perteneces a estos hogares. Entra a uno para continuar.
-                    </p>
-                  </div>
-                  <div className="w-10 h-10 rounded-xl bg-home-100 text-home-600 flex items-center justify-center shrink-0">
-                    <Home size={20} />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1">
+              <Card padding="none">
+                <p className="px-4 pb-2 pt-4 text-sm font-medium text-ink-2">Tus hogares</p>
+                <div className="max-h-72 divide-y divide-line overflow-y-auto">
                   {households.map((membership) => {
                     const isActive = membership.household_id === activeHouseholdId;
                     const householdName = membership.household?.name || 'Hogar sin nombre';
@@ -107,23 +92,16 @@ export function OnboardingPage() {
                         key={membership.id}
                         type="button"
                         onClick={() => handleEnterHousehold(membership.household_id)}
-                        className="group flex items-center gap-3 rounded-xl bg-surface-100 border border-border-subtle px-3 py-3 text-left hover:border-home-500/40 hover:bg-card transition-all cursor-pointer"
+                        className="group flex min-h-14 w-full cursor-pointer items-center gap-3 px-4 py-2 text-left transition-colors last:rounded-b-xl hover:bg-raised"
                       >
-                          <div className="w-10 h-10 rounded-xl bg-surface-100 text-surface-600 flex items-center justify-center shrink-0 group-hover:bg-home-100 group-hover:text-home-600 transition-colors">
-                          <Home size={18} />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-ink">{householdName}</p>
+                          <p className="mt-0.5 text-xs text-ink-3">
+                            {membership.role === 'admin' ? 'Administrador' : 'Miembro'}
+                            {isActive && ' · activo'}
+                          </p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-surface-900 truncate">{householdName}</p>
-                            {isActive && <CheckCircle2 size={14} className="text-success-500 shrink-0" />}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5 text-xs text-surface-500">
-                            {membership.role === 'admin' && <Crown size={12} className="text-warning-500" />}
-                            <span>{membership.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
-                            {isActive && <span className="text-home-600">• activo</span>}
-                          </div>
-                        </div>
-                        <ArrowRight size={18} className="text-surface-400 group-hover:text-home-500 transition-colors shrink-0" />
+                        <ArrowRight size={16} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
                       </button>
                     );
                   })}
@@ -131,47 +109,35 @@ export function OnboardingPage() {
               </Card>
             )}
 
-            {hasHouseholds && (
-              <p className="text-xs font-semibold text-surface-500 uppercase tracking-wider mt-2">
-                Otras opciones
-              </p>
-            )}
+            {hasHouseholds && <p className="mt-2 text-sm text-ink-3">Otras opciones</p>}
 
-            <Card hover onClick={() => setStep('create')} className="group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-home-100 text-home-600 flex items-center justify-center shrink-0 group-hover:bg-home-50 transition-colors">
-                  <Plus size={24} />
+            <Card hover onClick={() => setStep('create')} padding="sm" className="group">
+              <div className="flex items-center gap-3">
+                <Plus size={18} className="shrink-0 text-ink-3" />
+                <div className="min-w-0 flex-1 text-left">
+                  <h3 className="text-sm font-medium text-ink">Crear un hogar</h3>
+                  <p className="text-sm text-ink-2">Empieza un nuevo hogar e invita a los demás</p>
                 </div>
-                <div className="flex-1 text-left">
-                  <h3 className="font-semibold text-surface-900">Crear un hogar</h3>
-                  <p className="text-sm text-surface-600">
-                    Empieza un nuevo hogar e invita a los demás
-                  </p>
-                </div>
-                <ArrowRight size={18} className="text-surface-400 group-hover:text-home-500 transition-colors" />
+                <ArrowRight size={16} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
               </div>
             </Card>
 
-            <Card hover onClick={() => setStep('join')} className="group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-settings-100 text-settings-600 flex items-center justify-center shrink-0 group-hover:bg-settings-50 transition-colors">
-                  <UserPlus size={24} />
+            <Card hover onClick={() => setStep('join')} padding="sm" className="group">
+              <div className="flex items-center gap-3">
+                <UserPlus size={18} className="shrink-0 text-ink-3" />
+                <div className="min-w-0 flex-1 text-left">
+                  <h3 className="text-sm font-medium text-ink">Unirse a un hogar</h3>
+                  <p className="text-sm text-ink-2">Usa un código de invitación para unirte</p>
                 </div>
-                <div className="flex-1 text-left">
-                  <h3 className="font-semibold text-surface-900">Unirse a un hogar</h3>
-                  <p className="text-sm text-surface-600">
-                    Usa un código de invitación para unirte
-                  </p>
-                </div>
-                <ArrowRight size={18} className="text-surface-400 group-hover:text-settings-500 transition-colors" />
+                <ArrowRight size={16} className="shrink-0 text-ink-3 transition-colors group-hover:text-ink" />
               </div>
             </Card>
 
             <button
               onClick={signOut}
-              className="flex items-center justify-center gap-2 mt-4 text-sm text-surface-500 hover:text-surface-700 transition-colors cursor-pointer"
+              className="mt-4 flex cursor-pointer items-center justify-center gap-2 text-sm text-ink-3 transition-colors hover:text-ink"
             >
-              <LogOut size={14} />
+              <LogOut size={16} />
               Cerrar sesión
             </button>
           </div>
@@ -180,7 +146,7 @@ export function OnboardingPage() {
         {step === 'create' && (
           <Card>
             <form onSubmit={handleCreate} className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-surface-900">Crear un hogar nuevo</h3>
+              <h3 className="text-base font-medium text-ink">Crear un hogar nuevo</h3>
               <Input
                 label="Nombre del hogar"
                 placeholder="Ej: Casa de la familia Pérez"
@@ -191,7 +157,7 @@ export function OnboardingPage() {
               />
 
               {error && (
-                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100" role="alert">
+                <div className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
                   {error}
                 </div>
               )}
@@ -216,22 +182,22 @@ export function OnboardingPage() {
         {step === 'join' && (
           <Card>
             <form onSubmit={handleJoin} className="flex flex-col gap-4">
-              <h3 className="text-lg font-semibold text-surface-900">Unirse a un hogar</h3>
+              <h3 className="text-base font-medium text-ink">Unirse a un hogar</h3>
               <Input
                 label="Código de invitación"
                 placeholder="Ej: ABC12345"
                 value={inviteCode}
                 onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                className="tracking-widest text-center text-lg font-mono"
+                className="text-center font-mono text-base tracking-[0.2em]"
                 maxLength={8}
                 required
               />
-              <p className="text-xs text-surface-500 -mt-1">
+              <p className="-mt-2 text-xs text-ink-3">
                 Pide el código de 8 caracteres al administrador del hogar.
               </p>
 
               {error && (
-                <div className="bg-danger-50 text-danger-600 text-sm rounded-xl px-4 py-3 border border-danger-100" role="alert">
+                <div className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
                   {error}
                 </div>
               )}

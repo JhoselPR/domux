@@ -14,21 +14,21 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary:
-    'bg-home-fill text-white hover:bg-home-fill-hover active:bg-home-fill-hover shadow-md hover:shadow-lg shadow-home-fill/15',
+    'bg-primary text-on-primary hover:bg-primary-hover',
   secondary:
-    'bg-card-muted text-surface-800 hover:bg-surface-300 active:bg-surface-400 border border-border-subtle',
+    'bg-raised text-ink hover:bg-line-strong border border-line',
   ghost:
-    'bg-transparent text-surface-700 hover:bg-card-muted active:bg-surface-300',
+    'bg-transparent text-ink-2 hover:bg-raised hover:text-ink',
   danger:
-    'bg-danger-fill text-white hover:bg-danger-fill-hover active:bg-danger-fill-hover shadow-md shadow-danger-fill/15',
+    'bg-danger text-white hover:bg-danger-hover',
   outline:
-    'bg-elevated/70 border border-border text-surface-800 hover:border-home-500 hover:text-home-600 hover:bg-home-50',
+    'bg-card border border-line-strong text-ink hover:bg-raised',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-sm gap-1.5',
-  md: 'px-4 py-2.5 text-sm gap-2',
-  lg: 'px-6 py-3 text-base gap-2.5',
+  sm: 'h-8 px-3 text-sm gap-2',
+  md: 'h-10 px-4 text-sm gap-2',
+  lg: 'h-12 px-5 text-sm gap-2',
 };
 
 export function Button({
@@ -45,7 +45,7 @@ export function Button({
   return (
     <button
       className={clsx(
-        'inline-flex min-h-10 items-center justify-center font-semibold rounded-xl transition-all duration-200 cursor-pointer',
+        'inline-flex items-center justify-center font-medium rounded-lg transition-[color,background-color,border-color,transform] cursor-pointer active:scale-[0.98]',
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
         variantStyles[variant],
         sizeStyles[size],
