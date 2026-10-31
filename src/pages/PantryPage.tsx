@@ -6,9 +6,10 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
-import { Plus, Check, ShoppingCart, Trash2, DollarSign } from 'lucide-react';
+import { PageHeader, SectionTitle } from '@/components/ui/PageHeader';
+import { Plus, CheckCircle2, Circle, ShoppingCart, Trash2, DollarSign } from 'lucide-react';
 import type { PantryItem } from '@/types/database';
-// import { clsx } from 'clsx';
+import { formatMoney } from '@/lib/format';
 
 export function PantryPage() {
   const { activeHouseholdId } = useHouseholdStore();
@@ -114,69 +115,46 @@ export function PantryPage() {
   const totalSpent = bought.reduce((sum, i) => sum + (i.price || 0), 0);
 
   return (
-    <div className="sm:ml-16 lg:ml-56 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-surface-900">Despensa</h1>
-          <p className="text-surface-600 text-sm mt-1">Lista de compras del hogar</p>
-        </div>
-        <Button onClick={() => setShowAddModal(true)} icon={<Plus size={16} />}>Agregar</Button>
-      </div>
-
-      {/* Total Spent Card */}
-      {bought.length > 0 && (
-        <Card className="mb-6 bg-gradient-to-r from-pantry-50 to-pantry-100 border-pantry-500/30 shadow-md shadow-pantry-500/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-surface-700">Total gastado en despensa</p>
-              <p className="text-2xl font-bold text-surface-900">${totalSpent.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-            </div>
-            <DollarSign size={24} className="text-pantry-500" />
-          </div>
-        </Card>
-      )}
+    <div className="animate-fade-in">
+      <PageHeader title="Despensa" subtitle="Lo que hay que comprar" actions={<Button onClick={() => setShowAddModal(true)} icon={<Plus size={16} />}>Agregar</Button>} />
 
       {/* Unbought Items */}
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-3">Por comprar ({unbought.length})</h2>
+      <div className="mb-8">
+        <SectionTitle count={unbought.length}>Por comprar</SectionTitle>
         {unbought.length === 0 ? (
-          <Card><p className="text-sm text-surface-500 text-center py-4">¡Lista vacía! Agrega productos 🛒</p></Card>
+          <Card><p className="text-sm text-ink-3">La lista está vacía</p></Card>
         ) : (
-          <div className="flex flex-col gap-2">
+          <Card padding="none" className="divide-y divide-line">
             {unbought.map((item) => (
-              <Card key={item.id} padding="sm" className="group">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => markBought(item)} className="w-6 h-6 rounded-full border-2 border-surface-300 hover:border-pantry-500 hover:bg-pantry-50 transition-all cursor-pointer shrink-0" aria-label="Marcar producto como comprado" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-surface-900">{item.name}</p>
-                    {item.quantity > 1 && <p className="text-xs text-surface-500">Cantidad: {item.quantity}</p>}
-                  </div>
-                  <button onClick={() => deleteItem(item.id)} className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar producto"><Trash2 size={16} /></button>
-                </div>
-              </Card>
+              <div key={item.id} className="group flex min-h-12 items-center gap-3 px-4 py-2">
+                <button onClick={() => markBought(item)} className="shrink-0 cursor-pointer text-ink-3 transition-colors hover:text-accent" aria-label="Marcar producto como comprado"><Circle size={18} /></button>
+                <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink">{item.name}</p>
+                {item.quantity > 1 && <span className="font-mono text-xs tabular-nums text-ink-3">×{item.quantity}</span>}
+                <button onClick={() => deleteItem(item.id)} className="cursor-pointer text-ink-3 transition-[color,opacity] hover:text-danger focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 sm:opacity-0" aria-label="Eliminar producto"><Trash2 size={16} /></button>
+              </div>
             ))}
-          </div>
+          </Card>
         )}
       </div>
 
       {/* Bought Items */}
       {bought.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-3">Comprados ({bought.length})</h2>
-          <div className="flex flex-col gap-2">
+          <SectionTitle count={bought.length}>Comprados</SectionTitle>
+          <Card padding="none" className="divide-y divide-line">
             {bought.map((item) => (
-              <Card key={item.id} padding="sm" className="opacity-60">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => markBought(item)} className="text-success-500 cursor-pointer shrink-0" aria-label="Marcar producto como pendiente"><Check size={20} /></button>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-surface-700 line-through">{item.name}</p>
-                  </div>
-                  {item.price != null && <span className="text-sm font-medium text-surface-600">${item.price.toFixed(2)}</span>}
-                  <button onClick={() => deleteItem(item.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar producto"><Trash2 size={16} /></button>
-                </div>
-              </Card>
+              <div key={item.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
+                <button onClick={() => markBought(item)} className="shrink-0 cursor-pointer text-ink-3 transition-colors hover:text-ink" aria-label="Marcar producto como pendiente"><CheckCircle2 size={18} /></button>
+                <div className="min-w-0 flex-1"><span className="struck text-sm text-ink-2">{item.name}</span></div>
+                {item.price != null && <span className="font-mono text-xs tabular-nums text-ink-2">{formatMoney(item.price)}</span>}
+                <button onClick={() => deleteItem(item.id)} className="cursor-pointer text-ink-3 transition-colors hover:text-danger" aria-label="Eliminar producto"><Trash2 size={16} /></button>
+              </div>
             ))}
-          </div>
+            <div className="flex min-h-12 items-center justify-between gap-3 px-4 py-2">
+              <span className="text-sm text-ink-2">Total gastado en despensa</span>
+              <span className="mr-7 font-mono text-sm font-medium tabular-nums text-ink">{formatMoney(totalSpent)}</span>
+            </div>
+          </Card>
         </div>
       )}
 
@@ -192,7 +170,7 @@ export function PantryPage() {
               <Input label="Precio (opcional)" type="number" step="0.01" min="0" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} icon={<DollarSign size={16} />} />
             </div>
           </div>
-          {price && <p className="text-xs text-pantry-600">Al añadir precio, se marcará como comprado y se añadirá a gastos.</p>}
+          {price && <p className="text-xs text-ink-2">Al añadir precio, se marcará como comprado y se añadirá a gastos.</p>}
           <Button type="submit" loading={loading} fullWidth>Agregar a la lista</Button>
         </form>
       </Modal>
@@ -200,7 +178,7 @@ export function PantryPage() {
       {/* Price Modal */}
       <Modal isOpen={!!priceModal} onClose={() => { setPriceModal(null); setPrice(''); }} title="¿Agregar precio?">
         <div className="flex flex-col gap-4">
-          <p className="text-sm text-surface-600">Marcando <strong>{priceModal?.name}</strong> como comprado. ¿Deseas registrar el precio?</p>
+          <p className="text-sm text-ink-2">Marcando <span className="font-medium text-ink">{priceModal?.name}</span> como comprado. ¿Deseas registrar el precio?</p>
           <Input label="Precio (opcional)" type="number" step="0.01" min="0" placeholder="0.00" value={price} onChange={(e) => setPrice(e.target.value)} icon={<DollarSign size={16} />} />
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => confirmBought(false)} fullWidth className="flex-1">Sin precio</Button>

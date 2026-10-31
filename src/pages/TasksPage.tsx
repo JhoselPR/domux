@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { DateInput } from '@/components/ui/DateInput';
 import { Modal } from '@/components/ui/Modal';
+import { PageHeader, SectionTitle } from '@/components/ui/PageHeader';
+import { Segmented } from '@/components/ui/Segmented';
 import { Select } from '@/components/ui/Select';
 import { enableTaskPushNotifications, getPushNotificationState, type PushNotificationState } from '@/lib/pushNotifications';
-import { Plus, CheckCircle2, Circle, Calendar, User, Repeat, Trash2, Bell } from 'lucide-react';
+import { Plus, CheckCircle2, Circle, Trash2, Bell } from 'lucide-react';
 import type { Task, Profile, WeekDay } from '@/types/database';
 import { clsx } from 'clsx';
 
@@ -185,86 +187,79 @@ export function TasksPage() {
   const completedTasks = filteredTasks.filter((t) => t.status === 'completed');
 
   return (
-    <div className="sm:ml-16 lg:ml-56 animate-fade-in">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="font-display text-3xl font-bold text-surface-900">Tareas</h1>
-          <p className="text-surface-600 text-sm mt-1">Organiza las tareas del hogar</p>
-        </div>
-        <Button onClick={() => setShowModal(true)} icon={<Plus size={16} />}>Nueva tarea</Button>
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader title="Tareas" subtitle="Lo que falta hacer en casa" actions={<Button onClick={() => setShowModal(true)} icon={<Plus size={16} />}>Nueva tarea</Button>} />
 
       {/* View Mode Tabs */}
-      <div className="flex gap-1 p-1 bg-surface-200 rounded-xl w-fit mb-6">
-        {(['all', 'daily', 'weekly'] as ViewMode[]).map((mode) => (
-          <button key={mode} onClick={() => setViewMode(mode)}
-            className={clsx('px-4 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer',
-              viewMode === mode ? 'bg-tasks-100 text-tasks-600 shadow-sm' : 'text-surface-600 hover:text-surface-800')}>
-            {mode === 'all' ? 'Todas' : mode === 'daily' ? 'Hoy' : 'Semana'}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        className="mb-8"
+        value={viewMode}
+        onChange={setViewMode}
+        options={[
+          { key: 'all', label: 'Todas' },
+          { key: 'daily', label: 'Hoy' },
+          { key: 'weekly', label: 'Semana' },
+        ]}
+      />
 
-      <Card padding="sm" className="mb-6 bg-tasks-50/60">
+      {/* Reminders */}
+      <Card padding="sm" className="mb-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 rounded-full bg-tasks-100 p-2 text-tasks-600"><Bell size={16} /></span>
-            <div>
-              <p className="text-sm font-semibold text-surface-900">Recordatorios de tareas</p>
-              <p className="text-sm text-surface-600">Activa notificaciones persistentes para recibir avisos en este dispositivo.</p>
-              {pushMessage && <p className="mt-1 text-xs font-medium text-surface-600">{pushMessage}</p>}
-            </div>
+          <div>
+            <p className="text-sm font-medium text-ink">Recordatorios de tareas</p>
+            <p className="text-sm text-ink-2">Recibe avisos en este dispositivo</p>
+            {pushMessage && <p className="mt-1 text-xs text-ink-3">{pushMessage}</p>}
           </div>
-          <Button type="button" variant={pushState === 'granted' ? 'secondary' : 'primary'} onClick={enableNotifications} loading={pushLoading} disabled={pushState === 'unsupported' || pushState === 'missing-key'}>
+          <Button type="button" variant={pushState === 'granted' ? 'secondary' : 'outline'} onClick={enableNotifications} loading={pushLoading} disabled={pushState === 'unsupported' || pushState === 'missing-key'} icon={<Bell size={16} />}>
             {pushState === 'granted' ? 'Activadas' : 'Activar avisos'}
           </Button>
         </div>
       </Card>
 
       {/* Pending */}
-      <div className="mb-6">
-        <h2 className="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-3">Pendientes ({pendingTasks.length})</h2>
+      <div className="mb-8">
+        <SectionTitle count={pendingTasks.length}>Pendientes</SectionTitle>
         {pendingTasks.length === 0 ? (
-          <Card><p className="text-sm text-surface-500 text-center py-4">No hay tareas pendientes 🎉</p></Card>
+          <Card><p className="text-sm text-ink-3">No hay tareas pendientes</p></Card>
         ) : (
-          <div className="flex flex-col gap-2">
-            {pendingTasks.map((task) => (
-              <Card key={task.id} padding="sm" className="group">
-                <div className="flex items-center gap-3">
-                  <button onClick={() => toggleStatus(task)} className="text-surface-400 hover:text-tasks-500 transition-colors cursor-pointer shrink-0" aria-label="Marcar tarea como completada">
-                    <Circle size={20} />
+          <Card padding="none" className="divide-y divide-line">
+            {pendingTasks.map((task) => {
+              const meta = [
+                task.assignee?.full_name,
+                task.due_date && new Date(task.due_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }),
+                task.is_recurring && `Cada ${task.recurring_days.map((d) => WEEKDAYS.find((w) => w.key === d)?.short).join(', ')}`,
+              ].filter(Boolean);
+
+              return (
+                <div key={task.id} className="group flex min-h-14 items-center gap-3 px-4 py-2">
+                  <button onClick={() => toggleStatus(task)} className="shrink-0 cursor-pointer text-ink-3 transition-colors hover:text-accent" aria-label="Marcar tarea como completada">
+                    <Circle size={18} />
                   </button>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-surface-900 truncate">{task.title}</p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      {task.assignee && <span className="inline-flex items-center gap-1 text-xs text-surface-500"><User size={12} />{task.assignee.full_name}</span>}
-                      {task.due_date && <span className="inline-flex items-center gap-1 text-xs text-surface-500"><Calendar size={12} />{new Date(task.due_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}</span>}
-                      {task.is_recurring && <span className="inline-flex items-center gap-1 text-xs text-tasks-500"><Repeat size={12} />{task.recurring_days.map((d) => WEEKDAYS.find((w) => w.key === d)?.short).join(', ')}</span>}
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">{task.title}</p>
+                    {meta.length > 0 && <p className="mt-0.5 truncate text-xs text-ink-3">{meta.join(' · ')}</p>}
                   </div>
-                    <button onClick={() => deleteTask(task.id)} className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
+                  <button onClick={() => deleteTask(task.id)} className="cursor-pointer text-ink-3 transition-[color,opacity] hover:text-danger focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100 sm:opacity-0" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
                 </div>
-              </Card>
-            ))}
-          </div>
+              );
+            })}
+          </Card>
         )}
       </div>
 
       {/* Completed */}
       {completedTasks.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-surface-600 uppercase tracking-wider mb-3">Completadas ({completedTasks.length})</h2>
-          <div className="flex flex-col gap-2">
+          <SectionTitle count={completedTasks.length}>Completadas</SectionTitle>
+          <Card padding="none" className="divide-y divide-line">
             {completedTasks.map((task) => (
-              <Card key={task.id} padding="sm" className="opacity-60">
-                <div className="flex items-center gap-3">
-                   <button onClick={() => toggleStatus(task)} className="text-success-500 cursor-pointer shrink-0" aria-label="Marcar tarea como pendiente"><CheckCircle2 size={20} /></button>
-                  <p className="text-sm text-surface-700 line-through truncate flex-1">{task.title}</p>
-                   <button onClick={() => deleteTask(task.id)} className="text-surface-400 hover:text-danger-500 transition-all cursor-pointer" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
-                </div>
-              </Card>
+              <div key={task.id} className="flex min-h-12 items-center gap-3 px-4 py-2">
+                <button onClick={() => toggleStatus(task)} className="shrink-0 cursor-pointer text-ink-3 transition-colors hover:text-ink" aria-label="Marcar tarea como pendiente"><CheckCircle2 size={18} /></button>
+                <div className="min-w-0 flex-1"><span className="struck text-sm text-ink-2">{task.title}</span></div>
+                <button onClick={() => deleteTask(task.id)} className="cursor-pointer text-ink-3 transition-colors hover:text-danger" aria-label="Eliminar tarea"><Trash2 size={16} /></button>
+              </div>
             ))}
-          </div>
+          </Card>
         </div>
       )}
 
@@ -298,7 +293,7 @@ export function TasksPage() {
             />
           )}
           {formError && (
-            <div className="rounded-xl border border-danger-100 bg-danger-50 px-4 py-3 text-sm text-danger-600" role="alert">
+            <div className="rounded-lg bg-danger-soft px-3 py-2 text-sm text-danger" role="alert">
               {formError}
             </div>
           )}
@@ -306,15 +301,15 @@ export function TasksPage() {
           {/* Recurrence */}
           <div>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="w-4 h-4 rounded border-surface-300 text-tasks-600 focus:ring-tasks-500" />
-              <span className="text-sm font-medium text-surface-700">Repetir semanalmente</span>
+              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="h-4 w-4 rounded" />
+              <span className="text-sm font-medium text-ink-2">Repetir semanalmente</span>
             </label>
             {isRecurring && (
               <div className="flex gap-2 mt-3 flex-wrap">
                 {WEEKDAYS.map(({ key, short }) => (
                   <button key={key} type="button" onClick={() => toggleDay(key)}
-                    className={clsx('w-9 h-9 rounded-full text-xs font-semibold transition-all cursor-pointer',
-                      recurringDays.includes(key) ? 'bg-tasks-fill text-white shadow-md' : 'bg-surface-200 text-surface-600 hover:bg-surface-300')}>
+                    className={clsx('h-9 w-9 cursor-pointer rounded-lg text-xs font-medium transition-colors',
+                      recurringDays.includes(key) ? 'bg-primary text-on-primary' : 'bg-raised text-ink-2 hover:text-ink')}>
                     {short}
                   </button>
                 ))}

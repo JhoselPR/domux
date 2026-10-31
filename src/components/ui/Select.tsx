@@ -78,7 +78,7 @@ export function Select({
   return (
     <div ref={rootRef} className={clsx('relative flex flex-col gap-1.5', className)}>
       {label && (
-        <label id={`${selectId}-label`} className="text-sm font-medium text-surface-700">
+        <label id={`${selectId}-label`} className="text-sm font-medium text-ink-2">
           {label}
         </label>
       )}
@@ -113,16 +113,16 @@ export function Select({
           }
         }}
         className={clsx(
-          'flex w-full items-center justify-between gap-3 rounded-xl border border-border-subtle bg-elevated px-4 py-2.5 text-left text-sm',
-          'text-surface-900 shadow-sm transition-all duration-200 hover:border-border',
-          'focus:outline-none focus:ring-2 focus:ring-home-500/30 focus:border-home-500',
+          'flex h-10 w-full items-center justify-between gap-3 rounded-lg border border-line-strong bg-card px-3 text-left text-sm',
+          'text-ink transition-[border-color,box-shadow]',
+          'focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent',
           'disabled:cursor-not-allowed disabled:opacity-60'
         )}
       >
-        <span className={clsx('truncate', !selectedOption && 'text-surface-500')}>
+        <span className={clsx('truncate', !selectedOption && 'text-ink-3')}>
           {selectedOption?.label ?? placeholder}
         </span>
-        <ChevronDown size={16} className={clsx('shrink-0 text-surface-500 transition-transform', open && 'rotate-180')} />
+        <ChevronDown size={16} className={clsx('shrink-0 text-ink-3 transition-transform', open && 'rotate-180')} />
       </button>
 
       {open && (
@@ -137,7 +137,7 @@ export function Select({
               closePopover();
             }
           }}
-          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-56 overflow-auto rounded-2xl border border-border-subtle bg-card p-1.5 shadow-xl animate-slide-down"
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-56 overflow-auto rounded-xl border border-line bg-card p-1 shadow-[0_8px_24px_rgba(0,0,0,0.1)] animate-slide-down"
         >
           {options.map((option) => {
             const selected = option.value === value;
@@ -151,13 +151,13 @@ export function Select({
                 disabled={option.disabled}
                 onClick={() => chooseOption(option)}
                 className={clsx(
-                  'flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors',
-                  selected ? 'bg-home-100 text-home-600 font-semibold' : 'text-surface-700 hover:bg-card-muted',
+                  'flex h-9 w-full items-center justify-between gap-3 rounded-lg px-3 text-left text-sm transition-colors',
+                  selected ? 'bg-raised text-ink font-medium' : 'text-ink-2 hover:bg-raised hover:text-ink',
                   option.disabled && 'cursor-not-allowed opacity-50'
                 )}
               >
                 <span className="truncate">{option.label}</span>
-                {selected && <Check size={15} className="shrink-0" />}
+                {selected && <Check size={16} className="shrink-0" />}
               </button>
             );
           })}

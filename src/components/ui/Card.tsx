@@ -4,12 +4,13 @@ import type { KeyboardEvent, ReactNode } from 'react';
 interface CardProps {
   children: ReactNode;
   className?: string;
-  padding?: 'sm' | 'md' | 'lg';
+  padding?: 'none' | 'sm' | 'md' | 'lg';
   hover?: boolean;
   onClick?: () => void;
 }
 
 const paddingStyles = {
+  none: '',
   sm: 'p-4',
   md: 'p-5',
   lg: 'p-6',
@@ -28,9 +29,8 @@ export function Card({ children, className, padding = 'md', hover, onClick }: Ca
       onClick={onClick}
       onKeyDown={handleKeyDown}
       className={clsx(
-        'rounded-2xl bg-card border border-border-subtle shadow-sm',
-        'transition-all duration-200',
-        hover && 'hover:shadow-md hover:border-border cursor-pointer hover:-translate-y-0.5',
+        'rounded-xl border border-line bg-card',
+        hover && 'cursor-pointer transition-colors hover:border-line-strong hover:bg-raised',
         paddingStyles[padding],
         className
       )}

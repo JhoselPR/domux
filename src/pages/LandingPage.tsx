@@ -1,291 +1,150 @@
 import { Link } from 'react-router-dom';
 import { useThemeStore } from '@/stores/themeStore';
-import {
-  ArrowRight,
-  BellRing,
-  CheckCircle2,
-  ClipboardList,
-  Moon,
-  PackageCheck,
-  ReceiptText,
-  ShieldCheck,
-  Sparkles,
-  Sun,
-  UsersRound,
-} from 'lucide-react';
+import { Check, Moon, Sun } from 'lucide-react';
+import { FridgeDoor } from '@/components/landing/FridgeDoor';
+import { Logo } from '@/components/ui/Logo';
 
-const featureCards = [
+const features = [
   {
-    icon: ClipboardList,
     label: 'Tareas compartidas',
     title: 'Que la casa avance sin perseguir a nadie',
-    text: 'Asigna pendientes, ordena prioridades y mantén visible qué falta hacer en el hogar.',
-    accent: 'tasks',
+    text: 'Asigna pendientes, ordena prioridades y mantén visible qué falta hacer en el hogar. Si algo necesita atención, llega un aviso.',
   },
   {
-    icon: PackageCheck,
     label: 'Despensa y stock',
     title: 'Compra con contexto, no con memoria',
     text: 'Registra lo que hay, detecta faltantes y evita compras duplicadas antes de salir.',
-    accent: 'pantry',
   },
   {
-    icon: ReceiptText,
     label: 'Gastos del hogar',
     title: 'Cuentas claras para convivir mejor',
     text: 'Centraliza gastos comunes para entender en qué se va el dinero y coordinar aportes.',
-    accent: 'expenses',
   },
-] as const;
-
-const featureAccentStyles = {
-  tasks: {
-    icon: 'bg-tasks-100 text-tasks-600',
-    label: 'text-tasks-600',
-  },
-  pantry: {
-    icon: 'bg-pantry-100 text-pantry-600',
-    label: 'text-pantry-600',
-  },
-  expenses: {
-    icon: 'bg-expenses-100 text-expenses-600',
-    label: 'text-expenses-600',
-  },
-} as const;
+];
 
 const collaborationPoints = [
-  'Crea tu hogar y agrega integrantes con invitaciones.',
-  'Separa responsabilidades sin perder la vista completa.',
-  'Usa un espacio común para familia, pareja, compañeros de vivienda o equipos pequeños.',
+  'Crea tu hogar y agrega integrantes con invitaciones',
+  'Separa responsabilidades sin perder la vista completa',
+  'Un espacio común para familia, pareja, compañeros de vivienda o equipos pequeños',
 ];
 
-const weeklyRhythm = [
-  'Lunes: revisar tareas abiertas',
-  'Miércoles: actualizar despensa',
-  'Viernes: ordenar gastos comunes',
-];
-
-const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-home-500 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-50';
+const primaryAction = 'inline-flex h-12 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-on-primary transition-[background-color,transform] hover:bg-primary-hover active:scale-[0.98]';
+const secondaryAction = 'inline-flex h-12 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium text-ink transition-[background-color,transform] hover:bg-raised active:scale-[0.98]';
 
 export function LandingPage() {
   const { theme, toggleTheme } = useThemeStore();
 
   return (
-    <main className="min-h-screen overflow-hidden bg-transparent text-surface-900">
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-stretch gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-        <div className="flex w-full items-center justify-between sm:w-auto sm:gap-3">
-          <Link to="/" className={`flex w-fit items-center gap-2 rounded-xl font-display text-2xl font-bold tracking-tight text-surface-900 ${focusRing}`}>
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-home-50 to-tasks-100 shadow-lg shadow-home-500/20">
-              {/* <Home className="text-white" size={20} aria-hidden="true" /> */}
-              <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
-            </span>
-            Domux
-          </Link>
+    <main className="warm min-h-screen overflow-hidden">
+      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="rounded-md">
+          <Logo />
+        </Link>
 
+        <nav aria-label="Acceso" className="flex items-center gap-1 sm:gap-2">
           <button
             type="button"
             onClick={toggleTheme}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-surface-800 shadow-sm transition-colors hover:bg-card-muted hover:text-surface-900 sm:hidden ${focusRing}`}
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-raised hover:text-ink"
             aria-label="Cambiar tema"
           >
             {theme === 'light' ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
           </button>
-        </div>
-
-        <nav aria-label="Acceso" className="grid w-full grid-cols-2 items-center gap-3 sm:flex sm:w-auto sm:gap-3">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className={`hidden h-10 w-10 items-center justify-center rounded-xl border border-border bg-card text-surface-800 shadow-sm transition-colors hover:bg-card-muted hover:text-surface-900 sm:inline-flex ${focusRing}`}
-            aria-label="Cambiar tema"
-          >
-            {theme === 'light' ? <Moon size={18} aria-hidden="true" /> : <Sun size={18} aria-hidden="true" />}
-          </button>
-          <Link
-            to="/auth?mode=login"
-            className={`inline-flex min-h-10 items-center justify-center rounded-xl border border-border bg-card px-3 py-2 text-center text-sm font-semibold text-surface-800 shadow-sm transition-colors hover:border-home-500 hover:bg-home-50 hover:text-home-600 sm:px-4 ${focusRing}`}
-          >
+          <Link to="/auth?mode=login" className="hidden h-9 items-center rounded-lg px-3 text-sm text-ink-2 transition-colors hover:text-ink sm:flex">
             Iniciar sesión
           </Link>
           <Link
             to="/auth?mode=register"
-            className={`inline-flex min-h-10 items-center justify-center rounded-xl bg-home-fill px-3 py-2 text-center text-sm font-semibold text-white shadow-md shadow-home-fill/15 transition-all hover:bg-home-fill-hover hover:shadow-lg sm:px-4 ${focusRing}`}
+            className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-primary px-4 text-sm font-medium text-on-primary transition-colors hover:bg-primary-hover"
           >
             Crear cuenta
           </Link>
         </nav>
       </header>
 
-      <section className="relative mx-auto grid w-full max-w-6xl gap-12 px-5 pb-20 pt-8 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8 lg:pb-24 lg:pt-16">
-        <div className="absolute -right-28 top-8 hidden h-72 w-72 rounded-full bg-pantry-100/70 blur-3xl lg:block" aria-hidden="true" />
-        <div className="relative z-10 flex flex-col justify-center">
-          <div className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-border-subtle bg-card/80 px-3 py-1.5 text-sm font-semibold text-surface-700 shadow-sm backdrop-blur">
-            <Sparkles className="text-pantry-500" size={16} aria-hidden="true" />
-            El hogar completo, en un solo tablero
-          </div>
+      <section className="border-b border-line">
+        <div className="mx-auto grid w-full max-w-6xl items-end gap-12 px-4 pt-12 sm:px-6 lg:min-h-[calc(100vh-64px)] lg:grid-cols-2 lg:gap-16 lg:px-8 lg:pt-8">
+          <div className="animate-slide-up lg:self-center lg:pb-16">
+            <h1 className="font-display text-[44px] font-medium leading-[1.05] tracking-[-0.02em] text-ink sm:text-6xl lg:text-[68px] lg:tracking-[-0.03em]">
+              Ordena la casa sin convertirte en gerente de la casa
+            </h1>
 
-          <h1 className="font-display text-4xl font-bold leading-[1.04] tracking-tight text-surface-900 sm:text-6xl sm:leading-[0.96] lg:text-7xl">
-            Ordena la casa sin convertirte en gerente de la casa.
-          </h1>
+            <p className="mt-6 max-w-[36rem] text-lg leading-7 text-ink-2">
+              Domux reparte tareas, despensa y gastos entre quienes viven contigo: familias, parejas y hogares compartidos.
+            </p>
 
-          <p className="mt-6 max-w-2xl text-base leading-8 text-surface-600 sm:text-xl">
-            Domux ayuda a familias, parejas y hogares compartidos a coordinar tareas, despensa, gastos e invitaciones en un espacio claro, cálido y pensado para convivir mejor.
-          </p>
-
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Link
-              to="/auth?mode=register"
-              className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-home-fill px-6 py-3 text-base font-bold text-white shadow-lg shadow-home-fill/20 transition-all hover:-translate-y-0.5 hover:bg-home-fill-hover hover:shadow-xl ${focusRing}`}
-            >
-              Crear mi hogar en Domux
-              <ArrowRight size={18} aria-hidden="true" />
-            </Link>
-            <Link
-              to="/auth?mode=login"
-              className={`inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-card/75 px-6 py-3 text-base font-bold text-surface-800 shadow-sm transition-all hover:-translate-y-0.5 hover:border-home-500 hover:bg-home-50 hover:text-home-600 ${focusRing}`}
-            >
-              Ya tengo cuenta
-            </Link>
-          </div>
-
-          <div className="mt-9 grid max-w-xl grid-cols-1 gap-3 text-sm text-surface-600 sm:grid-cols-3">
-            {['Tareas visibles', 'Stock ordenado', 'Gastos claros'].map((item) => (
-              <div key={item} className="flex items-center gap-2 rounded-2xl bg-card/65 px-3 py-2 shadow-sm ring-1 ring-border-subtle/80">
-                <CheckCircle2 className="text-tasks-500" size={16} aria-hidden="true" />
-                <span className="font-semibold">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 lg:pl-4">
-          <div className="rounded-[2rem] border border-border-subtle bg-card/88 p-4 shadow-xl backdrop-blur sm:p-5">
-            <div className="rounded-[1.5rem] border border-border-subtle bg-elevated p-4 shadow-inner sm:p-6">
-              <div className="flex flex-col items-start gap-4 border-b border-border-subtle pb-5 sm:flex-row sm:justify-between">
-                <div>
-                  <p className="text-sm font-bold uppercase tracking-[0.22em] text-home-600">Casa Serrano</p>
-                  <h2 className="mt-2 font-display text-2xl font-bold text-surface-900 sm:text-3xl">Semana bajo control</h2>
-                </div>
-                <div className="rounded-2xl bg-tasks-100 px-3 py-2 text-sm font-bold text-tasks-600">4 personas</div>
-              </div>
-
-              <div className="grid gap-4 py-5 sm:grid-cols-2">
-                <article className="rounded-3xl bg-home-50 p-4 ring-1 ring-home-100">
-                  <p className="text-sm font-bold text-home-600">Hoy</p>
-                  <p className="mt-2 text-3xl font-extrabold text-surface-900">7</p>
-                  <p className="text-sm text-surface-600">tareas activas</p>
-                </article>
-                <article className="rounded-3xl bg-pantry-50 p-4 ring-1 ring-pantry-100">
-                  <p className="text-sm font-bold text-pantry-600">Despensa</p>
-                  <p className="mt-2 text-3xl font-extrabold text-surface-900">12</p>
-                  <p className="text-sm text-surface-600">items por reponer</p>
-                </article>
-              </div>
-
-              <div className="space-y-3">
-                {weeklyRhythm.map((item, index) => (
-                  <div key={item} className="flex items-center gap-3 rounded-2xl border border-border-subtle bg-card px-4 py-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-settings-100 text-sm font-extrabold text-settings-600">
-                      {index + 1}
-                    </span>
-                    <span className="font-semibold text-surface-800">{item}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-3xl border border-border bg-card-muted p-4 text-surface-900 shadow-lg">
-                <p className="text-sm font-semibold text-surface-600">Recordatorios inteligentes</p>
-                <div className="mt-3 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-tasks-100 text-tasks-600">
-                      <BellRing size={18} aria-hidden="true" />
-                    </span>
-                    <div>
-                      <p className="font-bold">Avisos para tareas pendientes</p>
-                      <p className="text-sm text-surface-600">Notificaciones cuando algo necesita atención</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full bg-tasks-100 px-3 py-1 text-sm font-bold text-tasks-600">Nuevo</span>
-                </div>
-              </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link to="/auth?mode=register" className={primaryAction}>
+                Crear mi hogar en Domux
+              </Link>
+              <Link to="/auth?mode=login" className={secondaryAction}>
+                Ya tengo cuenta
+              </Link>
             </div>
           </div>
+
+          <FridgeDoor />
         </div>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-6 lg:px-8" aria-labelledby="features-title">
-        <div className="max-w-2xl">
-          <p className="text-sm font-bold uppercase tracking-[0.24em] text-settings-600">Qué incluye</p>
-          <h2 id="features-title" className="mt-4 font-display text-3xl font-bold tracking-tight text-surface-900 sm:text-5xl">
-            Una base operativa para lo que normalmente queda en conversaciones dispersas.
-          </h2>
-        </div>
+      <section className="mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28" aria-labelledby="features-title">
+        <h2 id="features-title" className="max-w-3xl font-display text-3xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[44px]">
+          Lo que hoy se pierde en conversaciones dispersas, en un solo lugar
+        </h2>
 
-        <div className="mt-9 grid gap-5 lg:grid-cols-3">
-          {featureCards.map(({ icon: Icon, label, title, text, accent }) => (
-            <article key={title} className="rounded-[1.75rem] border border-border-subtle bg-card/82 p-6 shadow-md transition-all hover:-translate-y-1 hover:shadow-xl">
-              <div className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl ${featureAccentStyles[accent].icon}`}>
-                <Icon size={22} aria-hidden="true" />
-              </div>
-              <p className={`text-sm font-bold uppercase tracking-[0.18em] ${featureAccentStyles[accent].label}`}>{label}</p>
-              <h3 className="mt-3 text-2xl font-extrabold tracking-tight text-surface-900">{title}</h3>
-              <p className="mt-3 leading-7 text-surface-600">{text}</p>
+        <div className="mt-12 divide-y divide-line border-y border-line">
+          {features.map(({ label, title, text }) => (
+            <article key={title} className="grid gap-2 py-8 lg:grid-cols-[200px_minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+              <p className="text-sm text-ink-3 lg:pt-1">{label}</p>
+              <h3 className="font-display text-2xl font-medium leading-snug text-ink">{title}</h3>
+              <p className="text-base leading-7 text-ink-2">{text}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8" aria-labelledby="collaboration-title">
-        <div className="rounded-[2rem] border border-border-subtle bg-card p-7 text-surface-900 shadow-xl">
-          <UsersRound className="text-pantry-500" size={34} aria-hidden="true" />
-          <h2 id="collaboration-title" className="mt-5 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-            Pensado para hogares reales: con gente, roles y cambios.
+      <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 pb-20 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8 lg:pb-28" aria-labelledby="collaboration-title">
+        <div>
+          <h2 id="collaboration-title" className="font-display text-3xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[44px]">
+            Pensado para hogares reales: con gente, roles y cambios
           </h2>
-          <p className="mt-4 leading-7 text-surface-600">
+          <p className="mt-4 max-w-[36rem] text-base leading-7 text-ink-2">
             Domux no intenta reemplazar la conversación. La ordena: cada integrante sabe dónde mirar, qué resolver y cómo colaborar sin depender de recordatorios eternos.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <ul className="divide-y divide-line lg:self-end">
           {collaborationPoints.map((point) => (
-            <article key={point} className="rounded-[1.5rem] border border-border-subtle bg-card p-5 shadow-sm">
-              <ShieldCheck className="mb-4 text-tasks-500" size={24} aria-hidden="true" />
-              <p className="font-bold leading-7 text-surface-800">{point}</p>
-            </article>
+            <li key={point} className="flex gap-3 py-4 text-base leading-7 text-ink">
+              <Check size={18} className="mt-1 shrink-0 text-ink-3" aria-hidden="true" />
+              {point}
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-5 py-14 pb-24 sm:px-6 lg:px-8">
-        <div className="rounded-[2rem] border border-border-subtle bg-gradient-to-br from-card to-card-muted p-6 text-center shadow-xl sm:p-10">
-          <p className="text-sm font-bold uppercase tracking-[0.24em] text-home-600">Empieza simple</p>
-          <h2 className="mx-auto mt-4 max-w-3xl font-display text-3xl font-bold tracking-tight text-surface-900 sm:text-5xl">
-            Crea tu cuenta, configura tu hogar e invita a quienes conviven contigo.
+      <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
+        <div className="rounded-2xl bg-raised p-6 sm:p-12">
+          <h2 className="max-w-3xl font-display text-3xl font-medium leading-tight tracking-[-0.02em] text-ink sm:text-[44px]">
+            Crea tu cuenta, configura tu hogar e invita a quienes conviven contigo
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl leading-7 text-surface-600">
-            En pocos minutos tienes un lugar compartido para organizar lo cotidiano sin que todo dependa de una sola persona.
+          <p className="mt-4 max-w-[36rem] text-base leading-7 text-ink-2">
+            Un lugar compartido para organizar lo cotidiano sin que todo dependa de una sola persona.
           </p>
-          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              to="/auth?mode=register"
-              className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-home-fill px-6 py-3 font-bold text-white shadow-lg shadow-home-fill/20 transition-all hover:-translate-y-0.5 hover:bg-home-fill-hover ${focusRing}`}
-            >
-              Registrarme gratis
-              <ArrowRight size={18} aria-hidden="true" />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link to="/auth?mode=register" className={primaryAction}>
+              Crear cuenta
             </Link>
-            <Link
-              to="/auth?mode=login"
-              className={`inline-flex min-h-12 items-center justify-center rounded-2xl border border-border bg-elevated px-6 py-3 font-bold text-surface-800 transition-all hover:border-home-500 hover:bg-home-50 hover:text-home-600 ${focusRing}`}
-            >
+            <Link to="/auth?mode=login" className={secondaryAction}>
               Entrar a mi cuenta
             </Link>
           </div>
         </div>
       </section>
 
-      <footer className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 border-t border-border-subtle px-5 py-8 text-center text-sm text-surface-600 sm:flex-row sm:justify-between sm:px-6 sm:text-left lg:px-8">
-        <p>© 2026 Domux. Todos los derechos reservados.</p>
-        <a className={`rounded-lg font-semibold text-surface-800 underline decoration-home-500/40 underline-offset-4 transition-colors hover:text-home-600 hover:decoration-home-500 ${focusRing}`} href="mailto:felix.jhosel@gmail.com">
+      <footer className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 border-t border-line px-4 py-8 text-sm text-ink-3 sm:px-6 lg:px-8">
+        <p>© 2026 Domux</p>
+        <a className="rounded-sm text-ink-2 transition-colors hover:text-ink" href="mailto:felix.jhosel@gmail.com">
           Contacto
         </a>
       </footer>

@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useHouseholdStore } from '@/stores/householdStore';
-import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/components/ui/Card';
-import { ListTodo, ShoppingCart, Wallet, Users, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { ArrowRight, Circle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Task, PantryItem, Expense, Budget } from '@/types/database';
 import { filterExpensesByPeriod, formatLocalDate, getPeriodLabel, getPeriodRange } from '@/lib/expensePeriods';
+import { formatMoney } from '@/lib/format';
+import { clsx } from 'clsx';
 
 export function DashboardPage() {
   const { activeHouseholdId, activeHousehold } = useHouseholdStore();
-  const { profile } = useAuthStore();
   const navigate = useNavigate();
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [pendingCount, setPendingCount] = useState(0);
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [budget, setBudget] = useState<Budget | null>(null);
@@ -22,8 +24,8 @@ export function DashboardPage() {
   useEffect(() => {
     if (!activeHouseholdId) return;
     const fetchDashboard = async () => {
-      const [{ data: taskData }, { data: pantryData }, { data: budgetData }, { count }] = await Promise.all([
-        supabase.from('tasks').select('*').eq('household_id', activeHouseholdId).eq('status', 'pending').limit(5),
+      const [{ data: taskData, count: taskCount }, { data: pantryData }, { data: budgetData }, { count }] = await Promise.all([
+        supabase.from('tasks').select('*', { count: 'exact' }).eq('household_id', activeHouseholdId).eq('status', 'pending').limit(5),
         supabase.from('pantry_items').select('*').eq('household_id', activeHouseholdId).eq('is_bought', false),
         supabase.from('budgets').select('*').eq('household_id', activeHouseholdId).limit(1).single(),
         supabase.from('household_members').select('*', { count: 'exact', head: true }).eq('household_id', activeHouseholdId),
@@ -34,6 +36,7 @@ export function DashboardPage() {
       const expenseStart = budgetRange.start < monthlyRange.start ? budgetRange.start : monthlyRange.start;
       const { data: expenseData } = await supabase.from('expenses').select('*').eq('household_id', activeHouseholdId).gte('date', formatLocalDate(expenseStart));
       setTasks((taskData as Task[]) || []);
+      setPendingCount(taskCount || 0);
       setPantryItems((pantryData as PantryItem[]) || []);
       setExpenses((expenseData as Expense[]) || []);
       setBudget(budgetData as Budget | null);
@@ -50,82 +53,76 @@ export function DashboardPage() {
   const budgetUsedPercent = budgetAmount > 0 ? Math.min((budgetTotalExpenses / budgetAmount) * 100, 100) : 0;
   const isOverBudget = budgetTotalExpenses > budgetAmount && budgetAmount > 0;
 
-  const greeting = () => {
-    const h = new Date().getHours();
-    return h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches';
-  };
+  const today = new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+  const stats = [
+    { label: 'Tareas pendientes', value: pendingCount.toString(), to: '/tasks' },
+    { label: 'Por comprar', value: pantryItems.length.toString(), to: '/pantry' },
+    { label: 'Gastos del mes', value: formatMoney(totalExpenses), to: '/expenses' },
+    { label: 'Miembros', value: memberCount.toString() },
+  ];
 
   return (
-    <div className="sm:ml-16 lg:ml-56 animate-fade-in">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold text-surface-900">{greeting()}, {profile?.full_name?.split(' ')[0] || 'usuario'} 👋</h1>
-        <p className="text-surface-600 mt-1">{household?.household?.name ? `Resumen de "${household.household.name}"` : 'Selecciona un hogar para comenzar'}</p>
-      </div>
+    <div className="animate-fade-in">
+      <PageHeader title={household?.household?.name || 'Selecciona un hogar'} subtitle={today.charAt(0).toUpperCase() + today.slice(1)} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card hover onClick={() => navigate('/tasks')} className="group">
-          <div className="flex items-start justify-between">
-            <div><p className="text-sm text-surface-600">Tareas pendientes</p><p className="text-2xl font-bold text-surface-900 mt-1">{tasks.length}</p></div>
-            <div className="w-10 h-10 rounded-xl bg-tasks-100 text-tasks-600 flex items-center justify-center group-hover:bg-tasks-50 transition-colors"><ListTodo size={20} /></div>
-          </div>
-        </Card>
-        <Card hover onClick={() => navigate('/pantry')} className="group">
-          <div className="flex items-start justify-between">
-            <div><p className="text-sm text-surface-600">Por comprar</p><p className="text-2xl font-bold text-surface-900 mt-1">{pantryItems.length}</p></div>
-            <div className="w-10 h-10 rounded-xl bg-pantry-100 text-pantry-600 flex items-center justify-center"><ShoppingCart size={20} /></div>
-          </div>
-        </Card>
-        <Card hover onClick={() => navigate('/expenses')} className="group">
-          <div className="flex items-start justify-between">
-            <div><p className="text-sm text-surface-600">Gastos del mes</p><p className="text-2xl font-bold text-surface-900 mt-1">${totalExpenses.toLocaleString('es-MX', { minimumFractionDigits: 0 })}</p></div>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isOverBudget ? 'bg-danger-100 text-danger-600' : 'bg-expenses-100 text-expenses-600'}`}><Wallet size={20} /></div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-start justify-between">
-            <div><p className="text-sm text-surface-600">Miembros</p><p className="text-2xl font-bold text-surface-900 mt-1">{memberCount}</p></div>
-            <div className="w-10 h-10 rounded-xl bg-settings-100 text-settings-600 flex items-center justify-center"><Users size={20} /></div>
-          </div>
-        </Card>
+      <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {stats.map(({ label, value, to }) => (
+          <Card key={label} hover={!!to} onClick={to ? () => navigate(to) : undefined}>
+            <p className="text-sm text-ink-2">{label}</p>
+            <p className="mt-2 text-2xl font-medium tabular-nums text-ink sm:text-3xl">{value}</p>
+          </Card>
+        ))}
       </div>
 
       {budget && (
-        <Card className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2"><TrendingUp size={18} className="text-expenses-500" /><h3 className="font-semibold text-surface-900">Presupuesto ({getPeriodLabel(budget.period_type)})</h3></div>
-            <span className={`text-sm font-medium px-3 py-1 rounded-full ${isOverBudget ? 'bg-danger-100 text-danger-600' : 'bg-success-100 text-success-600'}`}>{isOverBudget ? 'Excedido' : 'En presupuesto'}</span>
+        <Card padding="lg" className="mb-4">
+          <div className="mb-4 flex items-baseline justify-between gap-4">
+            <h3 className="text-sm font-medium text-ink-2">Presupuesto ({getPeriodLabel(budget.period_type).toLowerCase()})</h3>
+            <span className={clsx('text-sm', isOverBudget ? 'font-medium text-danger' : 'text-ink-3')}>{isOverBudget ? 'Excedido' : 'En presupuesto'}</span>
           </div>
-          <div className="flex items-end gap-2 mb-3">
-            <span className="text-3xl font-bold text-surface-900">${budgetTotalExpenses.toLocaleString('es-MX')}</span>
-            <span className="text-surface-500 mb-1">/ ${budgetAmount.toLocaleString('es-MX')}</span>
+          <div className="mb-4 flex flex-wrap items-baseline gap-x-2">
+            <span className="font-display text-4xl font-medium tabular-nums text-ink">{formatMoney(budgetTotalExpenses)}</span>
+            <span className="text-sm tabular-nums text-ink-3">de {formatMoney(budgetAmount)}</span>
           </div>
-          <div className="w-full h-3 bg-surface-200 rounded-full overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-gradient-to-r from-danger-400 to-danger-600' : 'bg-gradient-to-r from-expenses-500 to-tasks-500'}`} style={{ width: `${budgetUsedPercent}%` }} />
+          <div className="h-2 w-full overflow-hidden rounded-full bg-raised">
+            <div className={clsx('h-full rounded-full', isOverBudget ? 'bg-danger' : 'bg-ink')} style={{ width: `${budgetUsedPercent}%` }} />
           </div>
-          <p className="text-xs text-surface-500 mt-2">{budgetAmount > budgetTotalExpenses ? `Te quedan $${(budgetAmount - budgetTotalExpenses).toLocaleString('es-MX')} disponibles` : `Excedido por $${(budgetTotalExpenses - budgetAmount).toLocaleString('es-MX')}`}</p>
+          <p className="mt-2 text-sm tabular-nums text-ink-3">{budgetAmount > budgetTotalExpenses ? `Quedan ${formatMoney(budgetAmount - budgetTotalExpenses)}` : `Excedido por ${formatMoney(budgetTotalExpenses - budgetAmount)}`}</p>
         </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-surface-900 flex items-center gap-2"><Clock size={16} className="text-tasks-500" />Tareas pendientes</h3>
-            <button onClick={() => navigate('/tasks')} className="text-xs text-tasks-600 hover:text-tasks-500 font-semibold cursor-pointer">Ver todas →</button>
-          </div>
-          {tasks.length === 0 ? <p className="text-sm text-surface-500 text-center py-4">¡No hay tareas pendientes! 🎉</p> : (
-            <div className="flex flex-col gap-2">{tasks.slice(0, 5).map((task) => (<div key={task.id} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 transition-colors"><CheckCircle2 size={16} className="text-surface-400 shrink-0" /><span className="text-sm text-surface-800 truncate">{task.title}</span></div>))}</div>
+          <ListHeader title="Tareas pendientes" action="Ver todas" onClick={() => navigate('/tasks')} />
+          {tasks.length === 0 ? <p className="py-4 text-sm text-ink-3">No hay tareas pendientes</p> : (
+            <div className="divide-y divide-line">{tasks.map((task) => (<div key={task.id} className="flex h-10 items-center gap-2"><Circle size={16} className="shrink-0 text-ink-3" /><span className="truncate text-sm text-ink">{task.title}</span></div>))}</div>
           )}
         </Card>
         <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-surface-900 flex items-center gap-2"><ShoppingCart size={16} className="text-pantry-500" />Lista de despensa</h3>
-            <button onClick={() => navigate('/pantry')} className="text-xs text-pantry-600 hover:text-pantry-500 font-semibold cursor-pointer">Ver todo →</button>
-          </div>
-          {pantryItems.length === 0 ? <p className="text-sm text-surface-500 text-center py-4">No hay nada pendiente por comprar 🛒</p> : (
-            <div className="flex flex-col gap-2">{pantryItems.slice(0, 5).map((item) => (<div key={item.id} className="flex items-center gap-3 px-3 py-2 rounded-xl bg-surface-100 hover:bg-surface-200 transition-colors"><div className="w-2 h-2 rounded-full bg-pantry-500 shrink-0" /><span className="text-sm text-surface-800 truncate">{item.name}</span>{item.quantity > 1 && <span className="text-xs text-surface-500 ml-auto">x{item.quantity}</span>}</div>))}</div>
+          <ListHeader title="Lista de despensa" action="Ver todo" onClick={() => navigate('/pantry')} />
+          {pantryItems.length === 0 ? <p className="py-4 text-sm text-ink-3">No hay nada pendiente por comprar</p> : (
+            <div className="divide-y divide-line">{pantryItems.slice(0, 5).map((item) => (<div key={item.id} className="flex h-10 items-center gap-2"><Circle size={16} className="shrink-0 text-ink-3" /><span className="truncate text-sm text-ink">{item.name}</span>{item.quantity > 1 && <span className="ml-auto font-mono text-xs tabular-nums text-ink-3">×{item.quantity}</span>}</div>))}</div>
           )}
         </Card>
       </div>
+    </div>
+  );
+}
+
+interface ListHeaderProps {
+  title: string;
+  action: string;
+  onClick: () => void;
+}
+
+function ListHeader({ title, action, onClick }: ListHeaderProps) {
+  return (
+    <div className="mb-2 flex items-center justify-between">
+      <h3 className="text-sm font-medium text-ink-2">{title}</h3>
+      <button onClick={onClick} className="-mr-2 flex h-8 cursor-pointer items-center gap-1 rounded-lg px-2 text-sm text-ink-3 transition-colors hover:bg-raised hover:text-ink">
+        {action}
+        <ArrowRight size={16} />
+      </button>
     </div>
   );
 }

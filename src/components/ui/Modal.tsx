@@ -49,23 +49,23 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-slate-950/55 backdrop-blur-sm animate-fade-in" />
+      <div className="absolute inset-0 bg-black/50 animate-fade-in" />
 
       {/* Content */}
       <div
         className={clsx(
-          'relative w-full bg-card rounded-2xl shadow-xl animate-scale-in',
-          'border border-border-subtle',
+          'relative w-full bg-card rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.12)] animate-scale-in',
+          'border border-line',
           sizeStyles[size]
         )}
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
-            <h3 className="text-lg font-semibold text-surface-900">{title}</h3>
+          <div className="flex items-center justify-between px-5 h-14 border-b border-line">
+            <h3 className="text-base font-medium text-ink">{title}</h3>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-surface-500 hover:bg-card-muted hover:text-surface-700 transition-colors cursor-pointer"
+              className="p-2 -mr-2 rounded-md text-ink-3 hover:bg-raised hover:text-ink transition-colors cursor-pointer"
               aria-label="Cerrar modal"
             >
               <X size={18} />
@@ -74,7 +74,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         )}
 
         {/* Body */}
-        <div className="p-6">{children}</div>
+        <div className="p-5">{children}</div>
       </div>
     </div>
   );

@@ -20,8 +20,8 @@ export default defineConfig({
         name: 'Domux',
         short_name: 'Domux',
         description: 'Gestiona tareas y gastos de tu hogar en equipo',
-        theme_color: '#5c7cfa',
-        background_color: '#ffffff',
+        theme_color: '#f7f4ee',
+        background_color: '#f7f4ee',
         display: 'standalone',
         icons: [
           {

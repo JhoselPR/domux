@@ -15,34 +15,33 @@ export function Input({ label, error, icon, className, id, ...props }: InputProp
       {label && (
         <label
           htmlFor={inputId}
-          className="text-sm font-medium text-surface-700"
+          className="text-sm font-medium text-ink-2"
         >
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3">
             {icon}
           </span>
         )}
         <input
           id={inputId}
           className={clsx(
-            'w-full rounded-xl border border-border-subtle bg-elevated px-4 py-2.5 text-sm',
-            'text-surface-900 placeholder:text-surface-500',
-            'transition-all duration-200',
-            'focus:outline-none focus:ring-2 focus:ring-home-500/30 focus:border-home-500',
-            'hover:border-border',
-            icon && 'pl-10',
-            error && 'border-danger-400 focus:ring-danger-500/30 focus:border-danger-500',
+            'h-10 w-full rounded-lg border border-line-strong bg-card px-3 text-sm',
+            'text-ink placeholder:text-ink-3',
+            'transition-[border-color,box-shadow]',
+            'focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent',
+            icon && 'pl-9',
+            error && 'border-danger focus:ring-danger/25 focus:border-danger',
             className
           )}
           {...props}
         />
       </div>
       {error && (
-        <p className="text-xs font-medium text-danger-500 animate-slide-down">{error}</p>
+        <p className="text-xs font-medium text-danger animate-slide-down">{error}</p>
       )}
     </div>
   );

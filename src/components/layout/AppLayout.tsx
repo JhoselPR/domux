@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Home,
   ListTodo,
@@ -9,21 +9,26 @@ import {
   Moon,
   LogOut,
   ChevronDown,
+  Plus,
   RefreshCw,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useHouseholdStore } from '@/stores/householdStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { Avatar } from '@/components/ui/Avatar';
+import { Logo, LogoMark } from '@/components/ui/Logo';
 import { useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Inicio', active: 'bg-home-100 text-home-600', marker: 'bg-home-500' },
-  { to: '/tasks', icon: ListTodo, label: 'Tareas', active: 'bg-tasks-100 text-tasks-600', marker: 'bg-tasks-500' },
-  { to: '/pantry', icon: ShoppingCart, label: 'Despensa', active: 'bg-pantry-100 text-pantry-600', marker: 'bg-pantry-500' },
-  { to: '/expenses', icon: Wallet, label: 'Gastos', active: 'bg-expenses-100 text-expenses-600', marker: 'bg-expenses-500' },
-  { to: '/settings', icon: Settings, label: 'Ajustes', active: 'bg-settings-100 text-settings-600', marker: 'bg-settings-500' },
+  { to: '/', icon: Home, label: 'Inicio' },
+  { to: '/tasks', icon: ListTodo, label: 'Tareas' },
+  { to: '/pantry', icon: ShoppingCart, label: 'Despensa' },
+  { to: '/expenses', icon: Wallet, label: 'Gastos' },
+  { to: '/settings', icon: Settings, label: 'Ajustes' },
 ];
+
+const iconButton = 'flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-ink-3 transition-colors hover:bg-raised hover:text-ink';
 
 export function AppLayout() {
   const { profile, signOut } = useAuthStore();
@@ -51,186 +56,146 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col">
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 bg-card/82 backdrop-blur-xl border-b border-border-subtle shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Left: Logo + Household Selector */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-home-50 to-tasks-100 flex items-center justify-center shadow-md shadow-home-500/20">
-                {/* <Home className="text-white" size={16} /> */}
-                <img src="/img/domux-iso.png" alt="Domux" className="w-full h-full" />
-              </div>
-              <span className="font-display text-xl font-bold text-surface-900 tracking-tight hidden sm:block">
-                Domux
-              </span>
-            </div>
-
-            {/* Household Selector */}
-            {households.length > 0 && (
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setHouseholdMenuOpen(!householdMenuOpen)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card-muted hover:bg-surface-300 text-sm font-medium text-surface-800 transition-colors cursor-pointer border border-border-subtle"
-                >
-                  <span className="max-w-[120px] sm:max-w-[200px] truncate">
-                    {currentHousehold?.household?.name || 'Seleccionar hogar'}
-                  </span>
-                  <ChevronDown size={14} className={clsx('transition-transform', householdMenuOpen && 'rotate-180')} />
-                </button>
-
-                {householdMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-64 bg-card border border-border-subtle rounded-2xl shadow-lg overflow-hidden animate-slide-down z-50">
-                    <div className="p-2">
-                      <p className="px-3 py-1.5 text-xs font-medium text-surface-500 uppercase tracking-wider">
-                        Tus hogares
-                      </p>
-                      {households.map((member) => (
-                        <button
-                          key={member.household_id}
-                          onClick={() => {
-                            setActiveHousehold(member.household_id);
-                            setHouseholdMenuOpen(false);
-                          }}
-                          className={clsx(
-                            'w-full text-left px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer',
-                            'flex items-center justify-between',
-                            member.household_id === activeHouseholdId
-                              ? 'bg-home-50 text-home-600 font-semibold'
-                              : 'text-surface-700 hover:bg-card-muted'
-                          )}
-                        >
-                          <span className="truncate">{member.household?.name}</span>
-                          {member.role === 'admin' && (
-                            <span className="text-xs bg-settings-100 text-settings-600 px-2 py-0.5 rounded-full shrink-0 ml-2">
-                              Admin
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="border-t border-border-subtle p-2">
-                      <button
-                        onClick={() => {
-                          setHouseholdMenuOpen(false);
-                          navigate('/onboarding');
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg text-sm text-home-600 hover:bg-home-50 transition-colors cursor-pointer font-semibold"
-                      >
-                        + Crear o unirse a otro hogar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => window.location.reload()}
-              className="p-2 rounded-xl text-surface-600 hover:bg-card-muted transition-colors cursor-pointer"
-              title="Sincronizar datos"
-              aria-label="Refresh data"
-            >
-              <RefreshCw size={18} />
-            </button>
-
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl text-surface-600 hover:bg-card-muted transition-colors cursor-pointer"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-
-            {profile && (
-              <div className="flex items-center gap-2 ml-1">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent-400 to-settings-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">
-                  {profile.full_name?.charAt(0).toUpperCase() || '?'}
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={handleSignOut}
-              className="p-2 rounded-xl text-surface-600 hover:bg-card-muted hover:text-danger-500 transition-colors cursor-pointer"
-              aria-label="Sign out"
-            >
-              <LogOut size={18} />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 pb-24 sm:pb-6">
-        <Outlet />
-      </main>
-
-      {/* Bottom Navigation (Mobile) */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card/92 backdrop-blur-xl border-t border-border-subtle sm:hidden z-40 shadow-lg">
-        <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map(({ to, icon: Icon, label, active }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === '/'}
-              className={({ isActive }) =>
-                clsx(
-                    'flex flex-col items-center gap-0.5 px-3 py-1 rounded-2xl transition-all duration-200 min-w-[56px]',
-                    isActive
-                     ? `${active} shadow-sm shadow-home-500/10`
-                     : 'text-surface-500 hover:text-surface-700'
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <div className={clsx(
-                    'p-1.5 rounded-2xl transition-all duration-200',
-                    isActive && 'bg-elevated/90 shadow-md ring-1 ring-white/40 dark:ring-white/10'
-                  )}>
-                    <Icon size={20} />
-                  </div>
-                  <span className="text-[10px] font-medium">{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-page">
       {/* Desktop Sidebar Navigation */}
-      <aside className="hidden sm:flex fixed left-0 top-14 bottom-0 w-16 lg:w-56 flex-col bg-card/78 backdrop-blur-xl border-r border-border-subtle z-30">
-        <nav className="flex flex-col gap-1 p-2 mt-2">
-          {navItems.map(({ to, icon: Icon, label, active, marker }) => (
+      <aside className="fixed bottom-0 left-0 top-0 z-30 hidden w-16 flex-col border-r border-line bg-page sm:flex lg:w-60">
+        <Link to="/" className="flex h-14 items-center justify-center px-4 lg:justify-start" aria-label="Domux">
+          <LogoMark className="lg:hidden" />
+          <span className="hidden lg:block"><Logo /></span>
+        </Link>
+        <nav className="flex flex-col gap-1 px-3 pt-2">
+          {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
               key={to}
               to={to}
               end={to === '/'}
+              aria-label={label}
               className={({ isActive }) =>
                 clsx(
-                  'relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group',
-                  isActive
-                    ? `${active} font-semibold shadow-sm`
-                    : 'text-surface-600 hover:bg-card-muted hover:text-surface-800'
+                  'flex h-9 items-center justify-center gap-2 rounded-lg px-2 text-sm transition-colors lg:justify-start',
+                  isActive ? 'bg-raised font-medium text-ink' : 'text-ink-2 hover:bg-raised hover:text-ink'
                 )
               }
             >
-              {({ isActive }) => (
-                <>
-                  {isActive && <span className={clsx('absolute left-1 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full', marker)} />}
-              <Icon size={20} />
-              <span className="hidden lg:block text-sm">{label}</span>
-                </>
-              )}
+              <Icon size={18} />
+              <span className="hidden lg:block">{label}</span>
             </NavLink>
           ))}
         </nav>
       </aside>
+
+      <div className="flex min-h-screen flex-col sm:pl-16 lg:pl-60">
+        {/* Top Header */}
+        <header className="sticky top-0 z-40 border-b border-line bg-page">
+          <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+            {/* Left: Household Selector */}
+            <div className="flex min-w-0 items-center gap-3">
+              <LogoMark className="sm:hidden" />
+
+              {households.length > 0 && (
+                <div className="relative min-w-0" ref={menuRef}>
+                  <button
+                    onClick={() => setHouseholdMenuOpen(!householdMenuOpen)}
+                    aria-expanded={householdMenuOpen}
+                    className="-ml-2 flex h-8 cursor-pointer items-center gap-1 rounded-lg px-2 text-sm font-medium text-ink transition-colors hover:bg-raised"
+                  >
+                    <span className="max-w-[120px] truncate sm:max-w-[200px]">
+                      {currentHousehold?.household?.name || 'Seleccionar hogar'}
+                    </span>
+                    <ChevronDown size={16} className={clsx('text-ink-3 transition-transform', householdMenuOpen && 'rotate-180')} />
+                  </button>
+
+                  {householdMenuOpen && (
+                    <div className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-xl border border-line bg-card shadow-[0_8px_24px_rgba(0,0,0,0.1)] animate-slide-down">
+                      <div className="p-1">
+                        <p className="px-3 pb-1 pt-2 text-xs text-ink-3">Tus hogares</p>
+                        {households.map((member) => (
+                          <button
+                            key={member.household_id}
+                            onClick={() => {
+                              setActiveHousehold(member.household_id);
+                              setHouseholdMenuOpen(false);
+                            }}
+                            className={clsx(
+                              'flex h-9 w-full cursor-pointer items-center justify-between rounded-lg px-3 text-left text-sm transition-colors',
+                              member.household_id === activeHouseholdId
+                                ? 'bg-raised font-medium text-ink'
+                                : 'text-ink-2 hover:bg-raised hover:text-ink'
+                            )}
+                          >
+                            <span className="truncate">{member.household?.name}</span>
+                            {member.role === 'admin' && <span className="ml-2 shrink-0 text-xs font-normal text-ink-3">Admin</span>}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="border-t border-line p-1">
+                        <button
+                          onClick={() => {
+                            setHouseholdMenuOpen(false);
+                            navigate('/onboarding');
+                          }}
+                          className="flex h-9 w-full cursor-pointer items-center gap-2 rounded-lg px-3 text-left text-sm text-ink-2 transition-colors hover:bg-raised hover:text-ink"
+                        >
+                          <Plus size={16} />
+                          Crear o unirse a otro hogar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1">
+              <button onClick={() => window.location.reload()} className={iconButton} title="Sincronizar datos" aria-label="Sincronizar datos">
+                <RefreshCw size={18} />
+              </button>
+
+              <button onClick={toggleTheme} className={iconButton} aria-label="Cambiar tema">
+                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+              </button>
+
+              <button onClick={handleSignOut} className={iconButton} aria-label="Cerrar sesión">
+                <LogOut size={18} />
+              </button>
+
+              {profile && (
+                <div className="ml-2">
+                  <Avatar name={profile.full_name} />
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-24 pt-8 sm:px-6 sm:pb-12 lg:px-8">
+          <Outlet />
+        </main>
+      </div>
+
+      {/* Bottom Navigation (Mobile) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-line bg-page sm:hidden">
+        <div className="flex h-16 items-center justify-around px-2">
+          {navItems.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                clsx(
+                  'flex min-w-14 flex-col items-center gap-1 rounded-lg px-2 py-1 transition-colors',
+                  isActive ? 'text-accent' : 'text-ink-3 hover:text-ink'
+                )
+              }
+            >
+              <Icon size={18} />
+              <span className="text-[11px] font-medium">{label}</span>
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </div>
   );
 }
